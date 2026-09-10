@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FormWheel Spy</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f6f8;color:#17181c}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+.top{height:68px;background:#fff;border-bottom:1px solid #e8e9ed;display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:5}
+.logo{font-weight:900;font-size:21px;letter-spacing:-1px;cursor:pointer;user-select:none}
+.logo span{font-weight:500;color:#777}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.card{background:#fff;border:1px solid #e7e8ec;border-radius:22px;padding:25px;box-shadow:0 8px 30px rgba(20,20,30,.05);margin-bottom:16px}
+h1{font-size:34px;letter-spacing:-1.5px;margin:5px 0 10px}
+h2{font-size:22px;margin:0 0 15px;letter-spacing:-.6px}
+p{color:#666;line-height:1.55}
+.hero{text-align:center;padding:38px 20px}
+.spyicon{font-size:58px;margin-bottom:8px}
+.sub{font-size:15px;color:#777}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;font-weight:700;margin:0 0 7px;color:#555}
+input{width:100%;border:1px solid #dfe1e6;border-radius:13px;padding:13px 14px;outline:none;background:#fafbfc}
+input:focus{border-color:#111;background:#fff}
+.btn{width:100%;padding:14px 16px;border-radius:13px;background:#17181c;color:#fff;font-weight:800;margin-top:10px}
+.btn.secondary{background:#eef0f3;color:#202126}
+.btn.danger{background:#fff0f0;color:#b42318}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.code{font-size:34px;font-weight:900;letter-spacing:7px;text-align:center;background:#f7f7f9;border-radius:15px;padding:18px;margin:12px 0}
+.players{display:flex;flex-wrap:wrap;gap:8px}
+.player{padding:9px 12px;background:#f1f2f5;border-radius:999px;font-weight:700;font-size:14px}
+.status{text-align:center;padding:10px;border-radius:12px;background:#f5f6f8;color:#666;font-size:13px}
+.hidden{display:none!important}
+.role{border-radius:20px;padding:30px 20px;text-align:center;margin:12px 0}
+.role.spy{background:#17181c;color:white}
+.role.citizen{background:#f0f1f4}
+.role .big{font-size:46px;font-weight:900;margin:5px 0 12px}
+.secret{font-size:28px;font-weight:900;margin-top:8px}
+.roundbox{background:#fafafa;border:1px dashed #d8d9de;border-radius:16px;padding:18px;text-align:center}
+.votegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.vote{background:#f0f1f4;color:#17181c;padding:13px;border-radius:12px;font-weight:800}
+.vote.selected{background:#17181c;color:#fff}
+.notice{padding:13px 15px;border-radius:13px;background:#fff8df;color:#745500;font-size:14px;margin:12px 0}
+.small{font-size:12px;color:#888}
+.back{display:inline-block;color:#666;font-size:13px;margin-bottom:12px;cursor:pointer}
+@media(max-width:560px){.grid{grid-template-columns:1fr}h1{font-size:30px}.card{padding:20px}.votegrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo" onclick="goHome()">FormWheel <span>Spy</span></div>
+</header>
+
+<main class="wrap">
+  <section id="home">
+    <div class="card hero">
+      <div class="spyicon">🕵️</div>
+      <h1>FormWheel Spy</h1>
+      <div class="sub">한 명의 Spy를 찾아내는 질문 추리 게임</div>
+    </div>
+    <div class="card">
+      <h2>게임 만들기</h2>
+      <p>방을 만들고 친구들에게 방 코드를 공유하세요.</p>
+      <label>내 닉네임</label>
+      <input id="hostName" maxlength="12" placeholder="예: 민수">
+      <button class="btn" onclick="createRoom()">방 만들기</button>
+    </div>
+    <div class="card">
+      <h2>게임 참가</h2>
+      <label>닉네임</label>
+      <input id="joinName" maxlength="12" placeholder="예: 지수">
+      <label style="margin-top:12px">방 코드</label>
+      <input id="roomInput" maxlength="6" placeholder="6자리 코드">
+      <button class="btn secondary" onclick="joinRoom()">참가하기</button>
+    </div>
+    <div class="card">
+      <div class="small">※ 실시간 방 기능은 PeerJS를 사용합니다. 모든 플레이어가 인터넷에 연결되어 있어야 합니다.</div>
+    </div>
+  </section>
+
+  <section id="lobby" class="hidden">
+    <div class="card">
+      <span class="back" onclick="leaveRoom()">← 나가기</span>
+      <h2>게임 대기실</h2>
+      <p>친구들에게 아래 방 코드를 알려주세요.</p>
+      <div id="roomCode" class="code">------</div>
+      <div id="connStatus" class="status">연결 준비 중...</div>
+      <h2 style="margin-top:22px">참가자 <span id="count">0</span>명</h2>
+      <div id="players" class="players"></div>
+      <div id="hostControls" class="hidden">
+        <button class="btn" onclick="startGame()">게임 시작</button>
+        <p class="small">최소 3명부터 시작할 수 있어요.</p>
+      </div>
+      <div id="guestWait" class="status hidden">호스트가 게임을 시작할 때까지 기다려주세요.</div>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="card">
+      <div class="small">ROUND 1</div>
+      <h2 id="gameTitle">당신의 역할</h2>
+      <div id="roleBox" class="role"></div>
+      <div id="gameNotice" class="notice hidden"></div>
+    </div>
+    <div class="card">
+      <h2>질문 시간</h2>
+      <div class="roundbox">
+        한 명씩 돌아가며 서로에게 질문하세요.<br>
+        <b>Spy는 정답을 모르기 때문에 눈치껏 대답해야 합니다.</b>
+      </div>
+      <p class="small">추천: “여기 자주 가?”, “여기서 돈을 많이 써?”, “밤에도 가?”처럼 정답을 직접 말하지 않는 질문!</p>
+    </div>
+    <div id="voteCard" class="card hidden">
+      <h2>Spy 투표</h2>
+      <p>가장 의심스러운 사람 한 명을 선택하세요.</p>
+      <div id="voteGrid" class="votegrid"></div>
+      <button id="voteBtn" class="btn" onclick="submitVote()" disabled>투표하기</button>
+    </div>
+    <div id="hostGameControls" class="card hidden">
+      <h2>호스트 진행</h2>
+      <button class="btn" onclick="showVoting()">투표 시작</button>
+      <button class="btn secondary" onclick="reveal()">정답 공개</button>
+    </div>
+    <div id="resultCard" class="card hidden">
+      <h2>결과</h2>
+      <div id="result"></div>
+      <button class="btn" onclick="newRound()">다시 하기</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const MAIN_URL="https://semicolonxss.github.io/Formwheel/";
+const words=[
+"놀이공원","학교","영화관","편의점","공항","병원","도서관","수영장","카페","PC방",
+"헬스장","해변","결혼식장","동물원","마트","기차역","호텔","식당","경찰서","축구장",
+
+"백화점","시장","은행","우체국","소방서","약국","미용실","세탁소","빵집","분식집",
+"패스트푸드점","노래방","볼링장","당구장","오락실","스키장","캠핑장","놀이방","찜질방","목욕탕",
+"사우나","공원","놀이터","체육관","수련원","박물관","미술관","과학관","전시회장","공연장",
+"콘서트장","연극장","도서관","대학교","학원","유치원","교실","운동장","옥상","지하철역",
+"버스터미널","고속도로 휴게소","주유소","주차장","자동차 정비소","세차장","택시 승강장","항구","부두","등대",
+"기차 안","버스 안","지하철 안","비행기 안","배 안","택시 안","엘리베이터","에스컬레이터","계단","지하 주차장",
+"호텔 로비","호텔 수영장","호텔 식당","식당 주방","카페 테라스","편의점 창고","마트 계산대","백화점 식품관","시장 골목","야시장",
+"농장","목장","과수원","온실","동굴","폭포","산 정상","등산로","강변","호수",
+"섬","사막","정글","숲","계곡","온천","수족관","동물 병원","동물 보호소","유원지",
+"골프장","야구장","농구장","테니스장","배드민턴장","스케이트장","경기장","탈의실","샤워실","화장실",
+"사무실","회의실","회사 로비","공장","연구실","실험실","창고","공사장","법원","교도소",
+
+// 😂 웃긴 장소 50개
+"화장실에서 몰래 통화하는 곳","엄마가 부르는 곳","친구가 돈 빌리는 곳","시험 전날 공부하는 곳",
+"시험 끝나고 후회하는 곳","숙제 안 해서 숨는 곳","몰래 간식 먹는 곳","선생님 몰래 자는 곳",
+"친구가 고백하는 곳","친구랑 싸우는 곳","친구가 삐진 곳","단체사진 찍는 곳",
+"길 잃고 헤매는 곳","휴대폰 찾으러 가는 곳","지갑 두고 오는 곳","우산 잃어버리는 곳",
+"충전기 빌리는 곳","와이파이 찾는 곳","자리 맡아놓고 사라지는 곳","줄 서다가 포기하는 곳",
+"메뉴 고르는데 30분 걸리는 곳","사진만 찍고 나오는 곳","한 명만 늦는 곳","약속 시간에 아무도 없는 곳",
+"친구가 갑자기 춤추는 곳","갑자기 노래 부르는 곳","아무도 안 웃는데 웃긴 곳","어색하게 침묵하는 곳",
+"모두가 휴대폰 보는 곳","갑자기 뛰어가는 곳","비 오는 날 우산 없는 곳","양말 젖는 곳",
+"신발 벗고 후회하는 곳","배고픈 사람이 많은 곳","다이어트 실패하는 곳","돈이 순식간에 사라지는 곳",
+"계획 없이 들어가는 곳","나오고 나서 후회하는 곳","친구가 길을 잘못 알려준 곳","부모님에게 들키면 안 되는 곳",
+"친구가 비밀을 말하는 곳","몰래 간식 사는 곳","갑자기 사람이 몰리는 곳","줄이 제일 긴 곳",
+"시간이 멈춘 것 같은 곳","나가기 싫어지는 곳","집에 가고 싶은 곳","집에 가기 싫은 곳",
+"친구가 갑자기 사라지는 곳","아무도 목적을 모르는 곳",
+
+// 🧠 어려운 장소 50개
+"국회의사당","대법원","헌법재판소","청와대","국립중앙박물관",
+"국립과학수사연구원","기상청","천문대","관측소","연구소",
+"데이터센터","서버실","관제센터","통제실","방송국",
+"촬영 스튜디오","뉴스룸","편집실","녹음실","무대 뒤편",
+"오페라 극장","발레 연습실","음악 연습실","미술 작업실","조각 작업실",
+"경매장","박람회장","컨벤션센터","국제회의장","대사관",
+"영사관","세관","검역소","공항 관제탑","비행기 격납고",
+"선박 조종실","선박 기관실","철도 관제실","지하철 관제실","터널 관리실",
+"발전소","변전소","정수장","하수처리장","폐기물 처리장",
+"냉동 창고","물류센터","우편물 분류장","인쇄소","제철소"
+];
+
+let peer=null, conn=null, connections=[], isHost=false, myName="", roomCode="", players=[], assignments={}, secret="", selectedVote="";
+let pendingPeers=[];
+
+function goHome(){ location.href=MAIN_URL; }
+function show(id){["home","lobby","game"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));}
+function randCode(){return Math.random().toString(36).slice(2,8).toUpperCase();}
+function setStatus(t){document.getElementById("connStatus").textContent=t;}
+function makePeer(id){return new Promise((resolve,reject)=>{
+  peer=new Peer(id,{debug:0});
+  peer.on("open",()=>resolve());
+  peer.on("error",e=>reject(e));
+  peer.on("connection",c=>hostConnection(c));
+});}
+
+async function createRoom(){
+  myName=document.getElementById("hostName").value.trim();
+  if(!myName)return alert("닉네임을 입력해주세요.");
+  isHost=true; roomCode=randCode();
+  try{
+    await makePeer(roomCode);
+    players=[{name:myName,id:roomCode}];
+    document.getElementById("roomCode").textContent=roomCode;
+    document.getElementById("hostControls").classList.remove("hidden");
+    document.getElementById("guestWait").classList.add("hidden");
+    setStatus("방이 만들어졌어요. 친구를 기다리는 중!");
+    renderPlayers(); show("lobby");
+  }catch(e){alert("방을 만들지 못했어요. 잠시 후 다시 시도해주세요.");}
+}
+function hostConnection(c){
+  c.on("open",()=>{
+    connections.push(c);
+    c.on("data",d=>handleHostData(c,d));
+    c.on("close",()=>{players=players.filter(p=>p.id!==c.peer);renderPlayers();broadcastLobby();});
+  });
+}
+function handleHostData(c,d){
+  if(d.type==="join"){
+    if(players.some(p=>p.id===c.peer))return;
+    players.push({name:d.name,id:c.peer});
+    c.send({type:"lobby",players});
+    broadcastLobby();
+    setStatus("참가자들이 연결되었습니다.");
+  }
+  if(d.type==="vote") handleVote(c.peer,d.target);
+}
+function broadcastLobby(){connections.forEach(c=>{if(c.open)c.send({type:"lobby",players});});renderPlayers();}
+function renderPlayers(){
+  document.getElementById("count").textContent=players.length;
+  document.getElementById("players").innerHTML=players.map(p=>`<div class="player">👤 ${escapeHtml(p.name)}${p.id===roomCode?" · HOST":""}</div>`).join("");
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+
+async function joinRoom(){
+  myName=document.getElementById("joinName").value.trim();
+  roomCode=document.getElementById("roomInput").value.trim().toUpperCase();
+  if(!myName||roomCode.length!==6)return alert("닉네임과 6자리 방 코드를 입력해주세요.");
+  isHost=false;
+  try{
+    peer=new Peer();
+    peer.on("open",()=>{
+      conn=peer.connect(roomCode,{reliable:true});
+      conn.on("open",()=>{
+        conn.send({type:"join",name:myName});
+        setStatus("호스트에 연결됨!");
+      });
+      conn.on("data",handleGuestData);
+      conn.on("close",()=>setStatus("호스트와 연결이 끊어졌어요."));
+    });
+    peer.on("error",e=>alert("방을 찾지 못했어요. 코드를 확인해주세요."));
+    document.getElementById("roomCode").textContent=roomCode;
+    document.getElementById("hostControls").classList.add("hidden");
+    document.getElementById("guestWait").classList.remove("hidden");
+    show("lobby");
+  }catch(e){alert("참가에 실패했어요.");}
+}
+function handleGuestData(d){
+  if(d.type==="lobby"){players=d.players;renderPlayers();}
+  if(d.type==="role"){applyRole(d);}
+  if(d.type==="voteStart"){document.getElementById("voteCard").classList.remove("hidden");buildVotes();}
+  if(d.type==="result"){showResult(d);}
+}
+function startGame(){
+  if(players.length<3)return alert("최소 3명이 필요해요.");
+  secret=words[Math.floor(Math.random()*words.length)];
+  assignments={};
+  const spyIndex=Math.floor(Math.random()*players.length);
+  players.forEach((p,i)=>assignments[p.id]=i===spyIndex?"spy":"citizen");
+  players.forEach(p=>{
+    const payload={type:"role",role:assignments[p.id],secret:assignments[p.id]==="spy"?null:secret,players};
+    if(p.id===roomCode)applyRole(payload);
+    else connections.find(c=>c.peer===p.id)?.send(payload);
+  });
+  document.getElementById("hostGameControls").classList.remove("hidden");
+  show("game");
+}
+function applyRole(d){
+  players=d.players||players;
+  document.getElementById("voteCard").classList.add("hidden");
+  document.getElementById("resultCard").classList.add("hidden");
+  const box=document.getElementById("roleBox");
+  if(d.role==="spy"){
+    box.className="role spy";
+    box.innerHTML='<div class="big">🕵️ SPY</div><div>당신은 Spy입니다.</div><div style="margin-top:14px">정답을 모릅니다.<br>다른 사람의 질문과 답을 보고 정답을 추리하세요.</div>';
+  }else{
+    box.className="role citizen";
+    box.innerHTML='<div class="big">👤 시민</div><div>당신은 시민입니다.</div><div style="margin-top:14px">정답은</div><div class="secret">'+escapeHtml(d.secret||"")+'</div>';
+  }
+  document.getElementById("gameTitle").textContent="당신의 역할";
+  show("game");
+}
+function showVoting(){
+  document.getElementById("voteCard").classList.remove("hidden");
+  document.getElementById("hostGameControls").classList.add("hidden");
+  connections.forEach(c=>{if(c.open)c.send({type:"voteStart"});});
+  buildVotes();
+}
+function buildVotes(){
+  document.getElementById("voteGrid").innerHTML=players.map(p=>`<button class="vote" data-id="${p.id}" onclick="selectVote('${p.id}')">${escapeHtml(p.name)}</button>`).join("");
+}
+function selectVote(id){
+  selectedVote=id;
+  document.querySelectorAll(".vote").forEach(b=>b.classList.toggle("selected",b.dataset.id===id));
+  document.getElementById("voteBtn").disabled=false;
+}
+function submitVote(){
+  if(!selectedVote)return;
+  if(isHost)handleVote(roomCode,selectedVote);
+  else conn?.send({type:"vote",target:selectedVote});
+  document.getElementById("voteBtn").disabled=true;
+  document.getElementById("gameNotice").classList.remove("hidden");
+  document.getElementById("gameNotice").textContent="투표가 제출되었습니다. 다른 사람을 기다리는 중...";
+}
+let votes={};
+function handleVote(voter,target){
+  votes[voter]=target;
+  if(Object.keys(votes).length>=players.length){
+    const tally={};
+    Object.values(votes).forEach(t=>tally[t]=(tally[t]||0)+1);
+    const winner=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const spy=players.find(p=>assignments[p.id]==="spy");
+    const caught=winner===spy?.id;
+    const result={type:"result",caught,spy:spy?.name,secret,mostVoted:players.find(p=>p.id===winner)?.name};
+    connections.forEach(c=>{if(c.open)c.send(result);});
+    showResult(result);
+  }
+}
+function showResult(d){
+  document.getElementById("resultCard").classList.remove("hidden");
+  document.getElementById("voteCard").classList.add("hidden");
+  document.getElementById("result").innerHTML=d.caught
+    ? `<div style="font-size:38px">🎉</div><h2>시민 승리!</h2><p>Spy <b>${escapeHtml(d.spy||"")}</b>를 찾아냈어요.</p><p>정답: <b>${escapeHtml(d.secret||"")}</b></p>`
+    : `<div style="font-size:38px">🕵️</div><h2>Spy 승리!</h2><p>Spy <b>${escapeHtml(d.spy||"")}</b>가 살아남았습니다.</p><p>정답: <b>${escapeHtml(d.secret||"")}</b></p>`;
+}
+function reveal(){
+  const spy=players.find(p=>assignments[p.id]==="spy");
+  const d={type:"result",caught:false,spy:spy?.name,secret};
+  connections.forEach(c=>{if(c.open)c.send(d);});
+  showResult(d);
+}
+function newRound(){
+  if(!isHost){alert("호스트가 다시 게임을 시작해주세요.");return;}
+  votes={}; selectedVote=""; startGame();
+}
+function leaveRoom(){
+  try{conn?.close();peer?.destroy();connections.forEach(c=>c.close());}catch(e){}
+  peer=null;conn=null;connections=[];isHost=false;players=[];votes={};
+  show("home");
+}
+window.addEventListener("beforeunload",()=>{try{peer?.destroy()}catch(e){}});
+</script>
+</body>
+</html>
