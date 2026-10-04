@@ -4,267 +4,159 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>FormWheel Spy</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f6f8;color:#17181c}
-button,input,select{font:inherit}button{cursor:pointer;border:0}
-.top{height:68px;background:#fff;border-bottom:1px solid #e8e9ed;display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:20}
-.logo{font-weight:900;font-size:21px;letter-spacing:-1px;cursor:pointer}.logo span{font-weight:500;color:#777}
-.wrap{max-width:820px;margin:0 auto;padding:24px 16px 60px}.card{background:#fff;border:1px solid #e7e8ec;border-radius:22px;padding:22px;box-shadow:0 8px 30px rgba(20,20,30,.05);margin-bottom:15px}
-h1{font-size:34px;letter-spacing:-1.5px;margin:5px 0 10px}h2{font-size:21px;margin:0 0 14px}p{color:#666;line-height:1.55}
-.hero{text-align:center;padding:34px 18px}.spyicon{font-size:56px}.sub{font-size:15px;color:#777}.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-label{display:block;font-size:13px;font-weight:800;margin:0 0 7px;color:#555}input,select{width:100%;border:1px solid #dfe1e6;border-radius:13px;padding:12px 13px;outline:none;background:#fafbfc}input:focus,select:focus{border-color:#111;background:#fff}
-.btn{width:100%;padding:13px 15px;border-radius:13px;background:#17181c;color:#fff;font-weight:800;margin-top:9px}.btn.secondary{background:#eef0f3;color:#202126}.btn.danger{background:#fff0f0;color:#b42318}.btn:disabled{opacity:.45;cursor:not-allowed}
-.code{font-size:30px;font-weight:900;letter-spacing:6px;text-align:center;background:#f7f7f9;border-radius:15px;padding:17px;margin:10px 0;word-break:break-all}
-.players,.chips{display:flex;flex-wrap:wrap;gap:8px}.player,.chip{padding:8px 11px;background:#f1f2f5;border-radius:999px;font-weight:700;font-size:13px}
-.status{text-align:center;padding:10px;border-radius:12px;background:#f5f6f8;color:#666;font-size:13px}.hidden{display:none!important}
-.role{border-radius:20px;padding:27px 18px;text-align:center;margin:10px 0}.role.spy{background:#17181c;color:white}.role.citizen{background:#f0f1f4}.role .big{font-size:42px;font-weight:900;margin:3px 0 10px}.secret{font-size:27px;font-weight:900;margin-top:8px}
-.notice{padding:13px 15px;border-radius:13px;background:#fff8df;color:#745500;font-size:14px;margin:11px 0}.small{font-size:12px;color:#888}.back{display:inline-block;color:#666;font-size:13px;margin-bottom:11px;cursor:pointer}
-.timer{font-size:40px;font-weight:900;text-align:center;margin:3px 0 4px}.timer.warn{color:#c62828}.turn{text-align:center;font-weight:800;margin-bottom:10px}
-.qrow{display:grid;grid-template-columns:150px 1fr;gap:9px}.qitem{padding:12px 13px;border:1px solid #e8e9ed;border-radius:13px;margin-top:8px;background:#fafbfc}.qmeta{font-size:12px;color:#777;margin-bottom:4px}.qtext{font-weight:700}.answer{margin-top:7px;color:#555}
-.votegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.vote{background:#f0f1f4;color:#17181c;padding:13px;border-radius:12px;font-weight:800}.vote.selected{background:#17181c;color:#fff}
-.resultWin{padding:18px;border-radius:16px;background:#f1fbf4}.resultLose{padding:18px;border-radius:16px;background:#fff3f3}
-.rules{display:grid;gap:8px}.rule{padding:11px 13px;border-radius:12px;background:#f7f8fa;font-size:14px}.tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#eee;font-size:11px;font-weight:800;margin-right:4px}
-@media(max-width:600px){.grid{grid-template-columns:1fr}.qrow{grid-template-columns:1fr}.votegrid{grid-template-columns:1fr}h1{font-size:29px}.card{padding:18px}.code{font-size:25px;letter-spacing:4px}}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.top{height:68px;background:#fff;border-bottom:1px solid #e8e9ed;display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:5}.logo{font-weight:900;font-size:21px;letter-spacing:-1px;cursor:pointer}.logo span{font-weight:500;color:#777}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}.card{background:#fff;border:1px solid #e7e8ec;border-radius:22px;padding:25px;box-shadow:0 8px 30px rgba(20,20,30,.05);margin-bottom:16px}
+h1{font-size:34px;letter-spacing:-1.5px;margin:5px 0 10px}h2{font-size:22px;margin:0 0 15px;letter-spacing:-.6px}p{color:#666;line-height:1.55}.hero{text-align:center;padding:38px 20px}.spyicon{font-size:58px;margin-bottom:8px}.sub{font-size:15px;color:#777}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-size:13px;font-weight:700;margin:0 0 7px;color:#555}input,select,textarea{width:100%;border:1px solid #dfe1e6;border-radius:13px;padding:13px 14px;outline:none;background:#fafbfc}textarea{min-height:85px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#111;background:#fff}
+.btn{width:100%;padding:14px 16px;border-radius:13px;background:#17181c;color:#fff;font-weight:800;margin-top:10px}.btn.secondary{background:#eef0f3;color:#202126}.btn.danger{background:#fff0f0;color:#b42318}.btn:disabled{opacity:.45;cursor:not-allowed}
+.code{font-size:34px;font-weight:900;letter-spacing:7px;text-align:center;background:#f7f7f9;border-radius:15px;padding:18px;margin:12px 0}.players{display:flex;flex-wrap:wrap;gap:8px}.player{padding:9px 12px;background:#f1f2f5;border-radius:999px;font-weight:700;font-size:14px}.status{text-align:center;padding:10px;border-radius:12px;background:#f5f6f8;color:#666;font-size:13px}.hidden{display:none!important}
+.role{border-radius:20px;padding:30px 20px;text-align:center;margin:12px 0}.role.spy{background:#17181c;color:#fff}.role.citizen{background:#f0f1f4}.role .big{font-size:46px;font-weight:900;margin:5px 0 12px}.secret{font-size:28px;font-weight:900;margin-top:8px}
+.roundbox{background:#fafafa;border:1px dashed #d8d9de;border-radius:16px;padding:18px;text-align:center}.votegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.vote{background:#f0f1f4;color:#17181c;padding:13px;border-radius:12px;font-weight:800}.vote.selected{background:#17181c;color:#fff}
+.notice{padding:13px 15px;border-radius:13px;background:#fff8df;color:#745500;font-size:14px;margin:12px 0}.small{font-size:12px;color:#888}.back{display:inline-block;color:#666;font-size:13px;margin-bottom:12px;cursor:pointer}
+.timer{font-size:38px;font-weight:900;text-align:center;margin:5px 0}.timer.warn{color:#b42318}.tag{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef0f3;font-size:12px;font-weight:800;margin:3px}.log{max-height:240px;overflow:auto;border:1px solid #eee;border-radius:13px;padding:10px}.logitem{padding:9px;border-bottom:1px solid #eee;font-size:14px}.logitem:last-child{border-bottom:0}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.winner{padding:18px;border-radius:16px;background:#f7f7f9;text-align:center}
+@media(max-width:560px){.grid,.two{grid-template-columns:1fr}h1{font-size:30px}.card{padding:20px}.votegrid{grid-template-columns:1fr}.code{font-size:27px;letter-spacing:5px}}
 </style>
 </head>
 <body>
 <header class="top"><div class="logo" onclick="goHome()">FormWheel <span>Spy</span></div></header>
 <main class="wrap">
-
 <section id="home">
- <div class="card hero"><div class="spyicon">🕵️</div><h1>FormWheel Spy</h1><div class="sub">질문으로 장소를 추리하고 Spy를 찾아내는 게임</div></div>
+ <div class="card hero"><div class="spyicon">🕵️</div><h1>FormWheel Spy</h1><div class="sub">한 명의 Spy를 찾아내는 질문 추리 게임</div></div>
  <div class="card">
-  <h2>게임 만들기</h2><p>방을 만들고 코드를 공유하세요. 새로고침해도 같은 게임 주소로 돌아올 수 있어요.</p>
+  <h2>게임 만들기</h2><p>방을 만들고 친구들에게 링크 또는 코드를 공유하세요.</p>
   <label>내 닉네임</label><input id="hostName" maxlength="12" placeholder="예: 민수">
-  <div class="grid" style="margin-top:12px">
-   <div><label>장소 카테고리</label><select id="category"><option value="all">전체</option><option value="일상">일상</option><option value="음식·쇼핑">음식·쇼핑</option><option value="교통">교통</option><option value="문화·스포츠">문화·스포츠</option><option value="자연">자연</option><option value="공공·특수">공공·특수</option><option value="혼돈">혼돈</option></select></div>
-   <div><label>난이도</label><select id="difficulty"><option value="easy">쉬움 · 질문 4회 / 3분</option><option value="normal" selected>보통 · 질문 3회 / 2분</option><option value="hard">어려움 · 질문 2회 / 90초</option></select></div>
-  </div>
+  <div class="grid" style="margin-top:12px"><div><label>난이도</label><select id="difficulty"><option value="easy">쉬움 · 4질문 · 3분</option><option value="normal" selected>보통 · 3질문 · 2분</option><option value="hard">어려움 · 2질문 · 90초</option></select></div><div><label>장소 범위</label><select id="category"><option value="all">전체</option><option value="daily">일상</option><option value="food">음식·쇼핑</option><option value="transport">교통</option><option value="culture">문화·스포츠</option><option value="nature">자연</option><option value="special">공공·특수</option><option value="chaos">혼돈</option></select></div></div>
   <button class="btn" onclick="createRoom()">방 만들기</button>
  </div>
- <div class="card">
-  <h2>게임 참가</h2><label>닉네임</label><input id="joinName" maxlength="12" placeholder="예: 지수">
-  <label style="margin-top:12px">방 코드</label><input id="roomInput" maxlength="6" placeholder="6자리 코드">
-  <button class="btn secondary" onclick="joinRoom()">참가하기</button>
- </div>
- <div class="card"><div class="small">※ 이 버전은 PeerJS를 사용합니다. 게임의 진행 상태는 호스트가 유지하며, 참가자는 같은 Code 주소로 재접속할 수 있습니다.</div></div>
+ <div class="card"><h2>게임 참가</h2><label>닉네임</label><input id="joinName" maxlength="12" placeholder="예: 지수"><label style="margin-top:12px">방 코드</label><input id="roomInput" maxlength="6" placeholder="6자리 코드"><button class="btn secondary" onclick="joinRoom()">참가하기</button></div>
+ <div class="card"><div class="small">※ Firebase Realtime Database에 방 상태를 저장합니다. 새로고침하거나 게임 주소로 다시 들어와도 진행 상태를 복구할 수 있습니다.</div></div>
 </section>
 
-<section id="lobby" class="hidden">
- <div class="card">
-  <span class="back" onclick="leaveRoom()">← 방 나가기</span><h2>게임 대기실</h2><p>이 주소를 그대로 공유하세요.</p>
-  <div id="roomCode" class="code">------</div><button class="btn secondary" onclick="copyRoomUrl()">게임 주소 복사</button>
-  <div id="connStatus" class="status" style="margin-top:10px">연결 준비 중...</div>
-  <h2 style="margin-top:22px">참가자 <span id="count">0</span>명</h2><div id="players" class="players"></div>
-  <div id="hostControls" class="hidden">
-   <button class="btn" onclick="startGame()">게임 시작</button><p class="small">최소 3명부터 시작할 수 있어요.</p>
-  </div>
-  <div id="guestWait" class="status hidden">호스트가 게임을 시작할 때까지 기다려주세요.</div>
- </div>
-</section>
+<section id="lobby" class="hidden"><div class="card">
+ <span class="back" onclick="leaveRoom()">← 나가기</span><h2>게임 대기실</h2><p>아래 주소를 공유하면 바로 입장할 수 있어요.</p>
+ <div id="roomCode" class="code">------</div><button class="btn secondary" onclick="copyRoomLink()">게임 링크 복사</button><div id="connStatus" class="status">Firebase 연결 준비 중...</div>
+ <h2 style="margin-top:22px">참가자 <span id="count">0</span>명</h2><div id="players" class="players"></div>
+ <div id="settingsView" class="small" style="margin-top:14px"></div>
+ <div id="hostControls" class="hidden"><button class="btn" onclick="startGame()">게임 시작</button><p class="small">최소 3명부터 시작할 수 있어요.</p></div>
+ <div id="guestWait" class="status hidden">호스트가 게임을 시작할 때까지 기다려주세요.</div>
+</div></section>
 
 <section id="game" class="hidden">
- <div class="card">
-  <div class="grid"><div><div class="small">ROUND <span id="roundNo">1</span></div><h2 id="gameTitle">당신의 역할</h2></div><div><div class="small">남은 시간</div><div id="timer" class="timer">--:--</div></div></div>
-  <div id="roleBox" class="role"></div><div id="gameNotice" class="notice hidden"></div>
- </div>
-
+ <div class="card"><div class="small" id="roundLabel">ROUND 1</div><h2 id="gameTitle">당신의 역할</h2><div id="roleBox" class="role"></div><div id="gameNotice" class="notice hidden"></div></div>
  <div id="questionCard" class="card">
-  <h2>질문 시간</h2><div id="turnInfo" class="turn"></div>
-  <div id="questionForm">
-   <div class="qrow"><select id="targetSelect"></select><input id="questionInput" maxlength="100" placeholder="예: 여기는 보통 조용한 편이야?"></div>
-   <button class="btn" onclick="askQuestion()">질문 보내기</button>
-  </div>
-  <p class="small">질문은 상대에게 정답을 직접 말하게 만들기보다 장소의 특징을 좁히는 방식으로 해보세요.</p>
-  <div id="questionLog"></div>
+  <h2>질문 시간</h2><div class="timer" id="timer">--:--</div><div class="roundbox">남은 질문: <b id="questionLeft">-</b>회 · 서로에게 질문하고 답변을 기록하세요.</div>
+  <div class="two" style="margin-top:12px"><div><label>질문할 사람</label><select id="questionTarget"></select></div><div><label>질문 내용</label><input id="questionText" maxlength="100" placeholder="예: 여기에 밤에도 와?"></div></div>
+  <button class="btn" onclick="submitQuestion()">질문 기록</button>
+  <div style="margin-top:15px"><label>질문 기록</label><div id="questionLog" class="log"></div></div>
  </div>
-
- <div id="answerCard" class="card hidden"><h2>질문에 답해주세요</h2><div id="incomingQuestion" class="notice"></div><input id="answerInput" maxlength="100" placeholder="대답을 입력하세요"><button class="btn" onclick="answerQuestion()">답변 보내기</button></div>
-
- <div id="voteCard" class="card hidden">
-  <h2>🗳️ Spy 투표</h2><p>가장 의심스러운 사람 한 명을 선택하세요. 모든 참가자의 투표가 모이면 결과가 처리됩니다.</p>
-  <div id="voteGrid" class="votegrid"></div><button id="voteBtn" class="btn" onclick="submitVote()" disabled>투표하기</button>
- </div>
-
- <div id="hostGameControls" class="card hidden"><h2>호스트 진행</h2><button class="btn" onclick="showVoting()">지금 투표 시작</button></div>
-
- <div id="spyGuessCard" class="card hidden">
-  <h2>🎯 마지막 기회!</h2><p>Spy가 검거되었습니다. 하지만 아직 끝나지 않았어요. 제시어를 정확히 맞히면 Spy가 역전승합니다.</p>
-  <input id="spyGuessInput" maxlength="100" placeholder="제시어를 입력하세요"><button class="btn" onclick="submitSpyGuess()">제시어 확인</button>
- </div>
-
- <div id="resultCard" class="card hidden"><h2>최종 결과</h2><div id="result"></div><button class="btn" onclick="newRound()">다시 하기</button></div>
+ <div id="answerCard" class="card hidden"><h2>답변하기</h2><div id="answerPrompt"></div><textarea id="answerText" maxlength="150" placeholder="질문에 답하세요"></textarea><button class="btn" onclick="submitAnswer()">답변 제출</button></div>
+ <div id="voteCard" class="card hidden"><h2>Spy 의심 투표</h2><p>가장 의심스러운 사람 한 명을 선택하세요. 모든 참가자가 투표하면 판정합니다.</p><div id="voteGrid" class="votegrid"></div><button id="voteBtn" class="btn" onclick="submitVote()" disabled>투표하기</button><div id="voteStatus" class="notice hidden"></div></div>
+ <div id="spyGuessCard" class="card hidden"><h2>🎯 Spy 마지막 기회</h2><p>당신이 Spy라면, 검거되었어도 제시어를 맞히면 역전승할 수 있습니다.</p><input id="spyGuess" placeholder="제시어를 입력하세요"><button class="btn" onclick="submitSpyGuess()">제시어 추측</button></div>
+ <div id="hostGameControls" class="card hidden"><h2>호스트 진행</h2><button class="btn" onclick="showVoting()">투표 시작</button><button class="btn secondary" onclick="endAsSpyWin()">즉시 Spy 승리 처리</button></div>
+ <div id="resultCard" class="card hidden"><h2>결과</h2><div id="result"></div><button class="btn" onclick="newRound()">다시 하기</button></div>
 </section>
 </main>
 
 <script>
 const MAIN_URL="https://semicolonxss.github.io/Formwheel/";
-const STORAGE_KEY="formwheel_spy_session_v3";
-const DIFF={easy:{label:"쉬움",questions:4,time:180},normal:{label:"보통",questions:3,time:120},hard:{label:"어려움",questions:2,time:90}};
-
-const placeData=[
-["일상","학교"],["일상","교실"],["일상","학원"],["일상","유치원"],["일상","대학교"],["일상","도서관"],["일상","집"],["일상","아파트"],["일상","놀이터"],["일상","공원"],["일상","화장실"],["일상","세탁소"],["일상","미용실"],["일상","헬스장"],["일상","찜질방"],["일상","목욕탕"],["일상","사우나"],["일상","사무실"],["일상","회의실"],["일상","회사 로비"],["일상","공장"],["일상","창고"],["일상","주차장"],["일상","지하 주차장"],["일상","옥상"],
-["음식·쇼핑","카페"],["음식·쇼핑","카페 테라스"],["음식·쇼핑","편의점"],["음식·쇼핑","편의점 창고"],["음식·쇼핑","식당"],["음식·쇼핑","식당 주방"],["음식·쇼핑","분식집"],["음식·쇼핑","빵집"],["음식·쇼핑","패스트푸드점"],["음식·쇼핑","노래방"],["음식·쇼핑","백화점"],["음식·쇼핑","백화점 식품관"],["음식·쇼핑","시장"],["음식·쇼핑","시장 골목"],["음식·쇼핑","야시장"],["음식·쇼핑","마트"],["음식·쇼핑","마트 계산대"],["음식·쇼핑","은행"],["음식·쇼핑","우체국"],["음식·쇼핑","약국"],["음식·쇼핑","경매장"],["음식·쇼핑","물류센터"],["음식·쇼핑","우편물 분류장"],
-["교통","공항"],["교통","공항 관제탑"],["교통","비행기 안"],["교통","비행기 격납고"],["교통","기차역"],["교통","기차 안"],["교통","버스터미널"],["교통","버스 안"],["교통","고속도로 휴게소"],["교통","주유소"],["교통","자동차 정비소"],["교통","세차장"],["교통","택시 승강장"],["교통","택시 안"],["교통","지하철역"],["교통","지하철 안"],["교통","철도 관제실"],["교통","지하철 관제실"],["교통","항구"],["교통","부두"],["교통","등대"],["교통","배 안"],["교통","선박 조종실"],["교통","선박 기관실"],["교통","터널 관리실"],["교통","엘리베이터"],["교통","에스컬레이터"],["교통","계단"],
-["문화·스포츠","영화관"],["문화·스포츠","박물관"],["문화·스포츠","미술관"],["문화·스포츠","과학관"],["문화·스포츠","전시회장"],["문화·스포츠","공연장"],["문화·스포츠","콘서트장"],["문화·스포츠","연극장"],["문화·스포츠","오페라 극장"],["문화·스포츠","촬영 스튜디오"],["문화·스포츠","뉴스룸"],["문화·스포츠","녹음실"],["문화·스포츠","음악 연습실"],["문화·스포츠","경매장"],["문화·스포츠","컨벤션센터"],["문화·스포츠","국제회의장"],["문화·스포츠","PC방"],["문화·스포츠","오락실"],["문화·스포츠","볼링장"],["문화·스포츠","당구장"],["문화·스포츠","체육관"],["문화·스포츠","운동장"],["문화·스포츠","축구장"],["문화·스포츠","야구장"],["문화·스포츠","농구장"],["문화·스포츠","테니스장"],["문화·스포츠","배드민턴장"],["문화·스포츠","골프장"],["문화·스포츠","수영장"],["문화·스포츠","스케이트장"],["문화·스포츠","탈의실"],["문화·스포츠","샤워실"],["문화·스포츠","놀이공원"],["문화·스포츠","유원지"],["문화·스포츠","동물원"],["문화·스포츠","수족관"],
-["자연","해변"],["자연","강변"],["자연","호수"],["자연","섬"],["자연","숲"],["자연","정글"],["자연","사막"],["자연","계곡"],["자연","폭포"],["자연","동굴"],["자연","산 정상"],["자연","등산로"],["자연","농장"],["자연","목장"],["자연","과수원"],["자연","온실"],["자연","온천"],["자연","캠핑장"],
-["공공·특수","경찰서"],["공공·특수","소방서"],["공공·특수","병원"],["공공·특수","동물 병원"],["공공·특수","동물 보호소"],["공공·특수","법원"],["공공·특수","교도소"],["공공·특수","국회의사당"],["공공·특수","대법원"],["공공·특수","헌법재판소"],["공공·특수","청와대"],["공공·특수","국립중앙박물관"],["공공·특수","국립과학수사연구원"],["공공·특수","기상청"],["공공·특수","천문대"],["공공·특수","관측소"],["공공·특수","연구소"],["공공·특수","실험실"],["공공·특수","데이터센터"],["공공·특수","서버실"],["공공·특수","관제센터"],["공공·특수","통제실"],["공공·특수","방송국"],["공공·특수","편집실"],["공공·특수","대사관"],["공공·특수","영사관"],["공공·특수","세관"],["공공·특수","검역소"],["공공·특수","발전소"],["공공·특수","변전소"],["공공·특수","정수장"],["공공·특수","하수처리장"],["공공·특수","폐기물 처리장"],["공공·특수","냉동 창고"],["공공·특수","인쇄소"],["공공·특수","제철소"],
-["혼돈","화장실에서 몰래 통화하는 곳"],["혼돈","엄마가 부르는 곳"],["혼돈","친구가 돈 빌리는 곳"],["혼돈","시험 전날 공부하는 곳"],["혼돈","시험 끝나고 후회하는 곳"],["혼돈","숙제 안 해서 숨는 곳"],["혼돈","몰래 간식 먹는 곳"],["혼돈","선생님 몰래 자는 곳"],["혼돈","친구가 고백하는 곳"],["혼돈","친구랑 싸우는 곳"],["혼돈","친구가 삐진 곳"],["혼돈","단체사진 찍는 곳"],["혼돈","길 잃고 헤매는 곳"],["혼돈","휴대폰 찾으러 가는 곳"],["혼돈","지갑 두고 오는 곳"],["혼돈","우산 잃어버리는 곳"],["혼돈","충전기 빌리는 곳"],["혼돈","와이파이 찾는 곳"],["혼돈","자리 맡아놓고 사라지는 곳"],["혼돈","줄 서다가 포기하는 곳"],["혼돈","메뉴 고르는데 30분 걸리는 곳"],["혼돈","사진만 찍고 나오는 곳"],["혼돈","한 명만 늦는 곳"],["혼돈","약속 시간에 아무도 없는 곳"],["혼돈","친구가 갑자기 춤추는 곳"],["혼돈","갑자기 노래 부르는 곳"],["혼돈","어색하게 침묵하는 곳"],["혼돈","모두가 휴대폰 보는 곳"],["혼돈","갑자기 뛰어가는 곳"],["혼돈","비 오는 날 우산 없는 곳"],["혼돈","양말 젖는 곳"],["혼돈","신발 벗고 후회하는 곳"],["혼돈","배고픈 사람이 많은 곳"],["혼돈","다이어트 실패하는 곳"],["혼돈","돈이 순식간에 사라지는 곳"],["혼돈","계획 없이 들어가는 곳"],["혼돈","나오고 나서 후회하는 곳"],["혼돈","친구가 길을 잘못 알려준 곳"],["혼돈","부모님에게 들키면 안 되는 곳"],["혼돈","친구가 비밀을 말하는 곳"],["혼돈","몰래 간식 사는 곳"],["혼돈","갑자기 사람이 몰리는 곳"],["혼돈","줄이 제일 긴 곳"],["혼돈","시간이 멈춘 것 같은 곳"],["혼돈","나가기 싫어지는 곳"],["혼돈","집에 가고 싶은 곳"],["혼돈","집에 가기 싫은 곳"],["혼돈","친구가 갑자기 사라지는 곳"],["혼돈","아무도 목적을 모르는 곳"],["혼돈","당신은 라이어입니다"],["혼돈","라이어"],["혼돈","Formwheel"],["혼돈","오류 404"]
-];
-const words=placeData.map(x=>x[1]);
-let peer=null,conn=null,connections=[],isHost=false,myName="",roomCode="",players=[],assignments={},secret="",selectedVote="",votes={},questions=[],round=1,difficulty="normal",phase="lobby",timeLeft=0,timerHandle=null,questionLimit=3,incoming=null,guessPending=false;
-
-function goHome(){clearInterval(timerHandle);try{peer?.destroy()}catch(e){};localStorage.removeItem(STORAGE_KEY);location.href=MAIN_URL}
+const firebaseConfig={apiKey:"AIzaSyBreTSe1m0-xlbF4aupnU5isRZCihR25IE",authDomain:"formwheel.firebaseapp.com",databaseURL:"https://formwheel-default-rtdb.firebaseio.com",projectId:"formwheel",storageBucket:"formwheel.firebasestorage.app",messagingSenderId:"431583088241",appId:"1:431583088241:web:74e0e34ea1e3e1170c55d0"};
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+const CONFIG={easy:{questions:4,time:180},normal:{questions:3,time:120},hard:{questions:2,time:90}};
+const categories={
+daily:["학교","병원","도서관","호텔","공원","놀이터","헬스장","화장실","사무실","회의실","회사 로비","공장","창고","학원","유치원","교실","운동장","옥상","세탁소","미용실","찜질방","목욕탕","사우나","캠핑장","놀이방","주차장","지하 주차장","호텔 로비","호텔 수영장","호텔 식당","농장","목장","과수원","온실"],
+food:["카페","편의점","식당","마트","백화점","시장","빵집","분식집","패스트푸드점","노래방","야시장","식당 주방","카페 테라스","편의점 창고","마트 계산대","백화점 식품관","시장 골목","경매장","푸드코트","디저트 가게","치킨집","피자집","한식당","중식당","일식당"],
+transport:["공항","기차역","지하철역","버스터미널","고속도로 휴게소","주유소","자동차 정비소","세차장","택시 승강장","항구","부두","등대","기차 안","버스 안","지하철 안","비행기 안","배 안","택시 안","엘리베이터","에스컬레이터","계단","공항 관제탑","비행기 격납고","선박 조종실","선박 기관실","철도 관제실","지하철 관제실","터널 관리실"],
+culture:["영화관","수영장","PC방","결혼식장","동물원","체육관","수련원","박물관","미술관","과학관","전시회장","공연장","콘서트장","연극장","대학교","오락실","볼링장","당구장","스키장","골프장","야구장","농구장","테니스장","배드민턴장","스케이트장","경기장","탈의실","샤워실","촬영 스튜디오","뉴스룸","편집실","녹음실","무대 뒤편","오페라 극장","발레 연습실","음악 연습실","미술 작업실","조각 작업실","박람회장","컨벤션센터","국제회의장"],
+nature:["해변","동굴","폭포","산 정상","등산로","강변","호수","섬","사막","정글","숲","계곡","온천","수족관","동물 보호소","유원지","골프장","농장","목장","과수원","온실"],
+special:["경찰서","소방서","약국","은행","우체국","법원","교도소","국회의사당","대법원","헌법재판소","청와대","국립중앙박물관","국립과학수사연구원","기상청","천문대","관측소","연구소","데이터센터","서버실","관제센터","통제실","방송국","대사관","영사관","세관","검역소","발전소","변전소","정수장","하수처리장","폐기물 처리장","냉동 창고","물류센터","우편물 분류장","인쇄소","제철소","공사장"],
+chaos:["화장실에서 몰래 통화하는 곳","엄마가 부르는 곳","친구가 돈 빌리는 곳","시험 전날 공부하는 곳","시험 끝나고 후회하는 곳","숙제 안 해서 숨는 곳","몰래 간식 먹는 곳","선생님 몰래 자는 곳","친구가 고백하는 곳","친구랑 싸우는 곳","친구가 삐진 곳","단체사진 찍는 곳","길 잃고 헤매는 곳","휴대폰 찾으러 가는 곳","지갑 두고 오는 곳","우산 잃어버리는 곳","충전기 빌리는 곳","와이파이 찾는 곳","자리 맡아놓고 사라지는 곳","줄 서다가 포기하는 곳","메뉴 고르는데 30분 걸리는 곳","사진만 찍고 나오는 곳","한 명만 늦는 곳","약속 시간에 아무도 없는 곳","친구가 갑자기 춤추는 곳","갑자기 노래 부르는 곳","아무도 안 웃는데 웃긴 곳","어색하게 침묵하는 곳","모두가 휴대폰 보는 곳","갑자기 뛰어가는 곳","비 오는 날 우산 없는 곳","양말 젖는 곳","신발 벗고 후회하는 곳","배고픈 사람이 많은 곳","다이어트 실패하는 곳","돈이 순식간에 사라지는 곳","계획 없이 들어가는 곳","나오고 나서 후회하는 곳","친구가 길을 잘못 알려준 곳","부모님에게 들키면 안 되는 곳","친구가 비밀을 말하는 곳","몰래 간식 사는 곳","갑자기 사람이 몰리는 곳","줄이 제일 긴 곳","시간이 멈춘 것 같은 곳","나가기 싫어지는 곳","집에 가고 싶은 곳","집에 가기 싫은 곳","친구가 갑자기 사라지는 곳","아무도 목적을 모르는 곳","당신은 라이어입니다","라이어","Formwheel","오류 404"]
+};
+let roomCode="",myId="",myName="",isHost=false,roomRef=null,roomData=null,localRole="",localSecret="",selectedVote="",timerHandle=null,joined=false;
+const getParam=()=>{let s=location.search;if(s.startsWith("?="))return s.slice(2,8).toUpperCase();return new URLSearchParams(s).get("code")?.toUpperCase()||""};
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function goHome(){location.href=MAIN_URL}
 function show(id){["home","lobby","game"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id))}
+function setStatus(t){document.getElementById("connStatus").textContent=t}
 function randCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
-function setStatus(t){let e=document.getElementById("connStatus");if(e)e.textContent=t}
-function saveSession(){localStorage.setItem(STORAGE_KEY,JSON.stringify({roomCode,myName,isHost}));}
-function loadSession(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")}catch(e){return null}}
-function setRoomUrl(code){history.replaceState(null,"",location.pathname+"?="+encodeURIComponent(code))}
-function roomFromUrl(){let s=location.search;return s.startsWith("?=")?decodeURIComponent(s.slice(2)).toUpperCase():""}
-function makePeer(id){return new Promise((resolve,reject)=>{peer=new Peer(id,{debug:0});peer.on("open",()=>resolve());peer.on("error",e=>reject(e));peer.on("connection",c=>hostConnection(c));peer.on("disconnected",()=>{try{peer.reconnect()}catch(e){}})})}
-function sendAll(data){connections.forEach(c=>{try{if(c.open)c.send(data)}catch(e){}})}
-function copyRoomUrl(){navigator.clipboard?.writeText(location.href).then(()=>alert("게임 주소를 복사했어요."),()=>alert(location.href))}
-function renderPlayers(){document.getElementById("count").textContent=players.length;document.getElementById("players").innerHTML=players.map(p=>`<div class="player">👤 ${escapeHtml(p.name)}${p.id===roomCode?" · HOST":""}</div>`).join("")}
-function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-
+function getId(){let x=localStorage.getItem("formwheel_spy_player_id");if(!x){x="p_"+Math.random().toString(36).slice(2,12);localStorage.setItem("formwheel_spy_player_id",x)}return x}
+function allWords(cat){return cat==="all"?Object.values(categories).flat():categories[cat]||categories.daily}
+function pickSecret(cat){let a=allWords(cat);return a[Math.floor(Math.random()*a.length)]}
+function renderPlayers(){let ps=roomData?.players||{};let arr=Object.values(ps);document.getElementById("count").textContent=arr.length;document.getElementById("players").innerHTML=arr.map(p=>`<div class="player">👤 ${esc(p.name)}${p.id===roomData.hostId?" · HOST":""}</div>`).join("")}
+function updateSettings(){if(!roomData)return;let c=CONFIG[roomData.difficulty]||CONFIG.normal;document.getElementById("settingsView").innerHTML=`난이도: <b>${roomData.difficulty==="easy"?"쉬움":roomData.difficulty==="hard"?"어려움":"보통"}</b> · 질문 ${c.questions}회 · ${c.time}초 · 장소 ${esc(roomData.category==="all"?"전체":roomData.category)}`}
+function roomLink(){return location.origin+location.pathname+"?="+roomCode}
+function copyRoomLink(){navigator.clipboard?.writeText(roomLink()).then(()=>alert("게임 링크를 복사했어요!")).catch(()=>prompt("이 링크를 복사하세요.",roomLink()))}
+function attachRoom(){
+ if(roomRef)roomRef.off();roomRef=db.ref("spyRooms/"+roomCode);
+ roomRef.on("value",snap=>{roomData=snap.val();if(!roomData){setStatus("방이 존재하지 않아요.");return}joined=true;renderPlayers();updateSettings();applyRoomState()});
+ db.ref(".info/connected").on("value",s=>setStatus(s.val()?"Firebase 연결됨":"Firebase 연결 끊김"));
+}
 async function createRoom(){
- myName=document.getElementById("hostName").value.trim();difficulty=document.getElementById("difficulty").value;
- if(!myName)return alert("닉네임을 입력해주세요.");
- isHost=true;roomCode=randCode();phase="lobby";
- try{await makePeer(roomCode);players=[{name:myName,id:roomCode}];saveSession();setRoomUrl(roomCode);
- document.getElementById("roomCode").textContent=roomCode;document.getElementById("hostControls").classList.remove("hidden");document.getElementById("guestWait").classList.add("hidden");setStatus("방이 만들어졌어요. 친구를 기다리는 중!");renderPlayers();show("lobby")
- }catch(e){alert("방을 만들지 못했어요. 잠시 후 다시 시도해주세요.")}
-}
-function hostConnection(c){c.on("open",()=>{if(!connections.some(x=>x.peer===c.peer))connections.push(c);c.on("data",d=>handleHostData(c,d));c.on("close",()=>{setTimeout(()=>{broadcastState()},500)})})}
-function handleHostData(c,d){
- if(d.type==="join"){
-  let old=players.find(p=>p.id===c.peer);if(old){old.name=d.name}else players.push({name:d.name,id:c.peer});
-  c.send(makeStateForGuest(c.peer));broadcastState();setStatus("참가자가 연결되었습니다.")
- }
- if(d.type==="vote")handleVote(c.peer,d.target)
- if(d.type==="question")receiveQuestion(c.peer,d.target,d.text)
- if(d.type==="answer")receiveAnswer(c.peer,d.answer)
- if(d.type==="guess")finishGuess(d.guess,c.peer)
- if(d.type==="requestState")c.send(makeStateForGuest(c.peer))
-}
-function makeStateForGuest(id){
- return {type:"state",players,assignments:assignments[id],secret:assignments[id]==="spy"?null:secret,phase,round,difficulty,timeLeft,questions,votes:Object.keys(votes).map(k=>k===id?votes[k]:""),incoming:incoming&&incoming.target===id?incoming:null,spyCaught:guessPending};
-}
-function broadcastState(){renderPlayers();sendAll({type:"state",players,phase,round,difficulty,timeLeft,questions});}
-function handleGuestData(d){
- if(d.type==="state")applyState(d);
- if(d.type==="role")applyRole(d);
- if(d.type==="voteStart"){phase="vote";showVotingUI();buildVotes()}
- if(d.type==="question")questions=d.questions||questions,renderQuestions();
- if(d.type==="answer"){questions=d.questions||questions;renderQuestions()}
- if(d.type==="incoming")showIncoming(d)}
-function applyState(d){
- players=d.players||players;phase=d.phase||phase;round=d.round||round;difficulty=d.difficulty||difficulty;questions=d.questions||questions;timeLeft=d.timeLeft??timeLeft;
- renderPlayers();
- if(d.role){applyRole(d)}else if(phase==="lobby"){show("lobby")}else{show("game");renderQuestions();if(phase==="vote")showVotingUI()}
- if(d.incoming&&d.incoming.target===myId())showIncoming(d.incoming)
- if(phase==="result"&&d.result)showResult(d.result)
-}
-function myId(){return isHost?roomCode:peer?.id}
-function startGame(){
- if(players.length<3)return alert("최소 3명이 필요해요.");
- const pool=placeData.filter(x=>document.getElementById("category").value==="all"||x[0]===document.getElementById("category").value);
- secret=(pool.length?pool:placeData)[Math.floor(Math.random()*(pool.length?pool:placeData).length)][1];
- assignments={};const spyIndex=Math.floor(Math.random()*players.length);players.forEach((p,i)=>assignments[p.id]=i===spyIndex?"spy":"citizen");
- round++;phase="question";votes={};questions=[];selectedVote="";incoming=null;guessPending=false;
- const cfg=DIFF[difficulty];questionLimit=cfg.questions;timeLeft=cfg.time;show("game");applyRole({role:assignments[roomCode],secret:assignments[roomCode]==="spy"?null:secret,players});document.getElementById("hostGameControls").classList.remove("hidden");startTimer();
- players.forEach(p=>{const payload={type:"role",role:assignments[p.id],secret:assignments[p.id]==="spy"?null:secret,players};if(p.id===roomCode)return;connections.find(c=>c.peer===p.id)?.send(payload)});
- sendAll({type:"state",players,phase,round,difficulty,questions,timeLeft});renderQuestions();
-}
-function applyRole(d){
- players=d.players||players;document.getElementById("voteCard").classList.add("hidden");document.getElementById("resultCard").classList.add("hidden");document.getElementById("spyGuessCard").classList.add("hidden");
- const box=document.getElementById("roleBox");
- if(d.role==="spy"){box.className="role spy";box.innerHTML='<div class="big">🕵️ SPY</div><div>당신은 Spy입니다.</div><div style="margin-top:14px">제시어는 보이지 않습니다.<br>질문과 답변을 잘 보고 장소를 추리하세요.</div>'}
- else{box.className="role citizen";box.innerHTML='<div class="big">👤 시민</div><div>당신은 시민입니다.</div><div style="margin-top:14px">제시어는</div><div class="secret">'+escapeHtml(d.secret||"")+'</div>'}
- document.getElementById("gameTitle").textContent="당신의 역할";show("game");renderTargetOptions();renderQuestions()
-}
-function startTimer(){
- clearInterval(timerHandle);updateTimer();timerHandle=setInterval(()=>{if(phase!=="question"){clearInterval(timerHandle);return}timeLeft--;updateTimer();if(timeLeft<=0){clearInterval(timerHandle);if(isHost)showVoting()}},1000)
-}
-function updateTimer(){let m=Math.floor(Math.max(0,timeLeft)/60),s=Math.max(0,timeLeft)%60,e=document.getElementById("timer");e.textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;e.classList.toggle("warn",timeLeft<=20)}
-function renderTargetOptions(){
- const sel=document.getElementById("targetSelect");if(!sel)return;
- sel.innerHTML=players.filter(p=>p.id!==myId()).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
-}
-function askQuestion(){
- if(phase!=="question")return alert("질문 시간이 끝났어요.");
- const mine=questions.filter(q=>q.from===myId()).length;if(mine>=questionLimit)return alert(`이번 라운드 질문은 최대 ${questionLimit}회까지 가능합니다.`);
- const target=document.getElementById("targetSelect").value,text=document.getElementById("questionInput").value.trim();if(!target||!text)return alert("대상과 질문을 입력해주세요.");
- if(isHost)receiveQuestion(roomCode,target,text);else conn?.send({type:"question",target,text});
- document.getElementById("questionInput").value="";
-}
-function receiveQuestion(from,target,text){
- const q={from,target,text,answer:"",time:Date.now()};questions.push(q);incoming={...q};sendAll({type:"question",questions});const c=connections.find(x=>x.peer===target);if(c?.open)c.send({type:"incoming",...q});if(target===roomCode)showIncoming(q);renderQuestions();broadcastState()
-}
-function showIncoming(q){incoming=q;document.getElementById("answerCard").classList.remove("hidden");document.getElementById("incomingQuestion").textContent=`${nameOf(q.from)}님의 질문: ${q.text}`}
-function answerQuestion(){
- if(!incoming)return;const answer=document.getElementById("answerInput").value.trim();if(!answer)return alert("답변을 입력해주세요.");
- if(isHost)receiveAnswer(roomCode,answer);else conn?.send({type:"answer",answer});document.getElementById("answerInput").value="";document.getElementById("answerCard").classList.add("hidden");incoming=null
-}
-function receiveAnswer(from,answer){
- const q=[...questions].reverse().find(x=>x.target===from&&!x.answer);if(!q)return;q.answer=answer;incoming=null;sendAll({type:"answer",questions});renderQuestions();broadcastState()
-}
-function renderQuestions(){
- const box=document.getElementById("questionLog");if(!box)return;
- box.innerHTML=questions.length?questions.map(q=>`<div class="qitem"><div class="qmeta">${escapeHtml(nameOf(q.from))} → ${escapeHtml(nameOf(q.target))}</div><div class="qtext">${escapeHtml(q.text)}</div>${q.answer?`<div class="answer">↳ ${escapeHtml(q.answer)}</div>`:"<div class=\"small\">답변 대기 중…</div>"}</div>`).join(""):'<div class="small">아직 질문 기록이 없습니다.</div>';
- document.getElementById("turnInfo").textContent=`내 질문 ${questions.filter(q=>q.from===myId()).length} / ${questionLimit}회`;
- renderTargetOptions()
-}
-function nameOf(id){return players.find(p=>p.id===id)?.name||"알 수 없음"}
-
-function showVoting(){
- if(!isHost)return;phase="vote";clearInterval(timerHandle);showVotingUI();votes={};selectedVote="";sendAll({type:"voteStart"});broadcastState()
-}
-function showVotingUI(){document.getElementById("questionCard").classList.add("hidden");document.getElementById("answerCard").classList.add("hidden");document.getElementById("voteCard").classList.remove("hidden");document.getElementById("hostGameControls").classList.add("hidden");buildVotes()}
-function buildVotes(){document.getElementById("voteGrid").innerHTML=players.filter(p=>p.id!==myId()).map(p=>`<button class="vote" data-id="${p.id}" onclick="selectVote('${p.id}')">${escapeHtml(p.name)}</button>`).join("")}
-function selectVote(id){selectedVote=id;document.querySelectorAll(".vote").forEach(b=>b.classList.toggle("selected",b.dataset.id===id));document.getElementById("voteBtn").disabled=false}
-function submitVote(){if(!selectedVote)return;if(isHost)handleVote(roomCode,selectedVote);else conn?.send({type:"vote",target:selectedVote});document.getElementById("voteBtn").disabled=true;document.getElementById("gameNotice").classList.remove("hidden");document.getElementById("gameNotice").textContent="투표가 제출되었습니다. 다른 사람을 기다리는 중…"}
-function handleVote(voter,target){
- if(votes[voter])return;votes[voter]=target;sendAll({type:"voteProgress",count:Object.keys(votes).length,total:players.length});
- if(Object.keys(votes).length>=players.length){const tally={};Object.values(votes).forEach(t=>tally[t]=(tally[t]||0)+1);const max=Math.max(...Object.values(tally));const top=Object.keys(tally).filter(k=>tally[k]===max);const winner=top[Math.floor(Math.random()*top.length)];const spy=players.find(p=>assignments[p.id]==="spy");const caught=winner===spy?.id;phase=caught?"guess":"result";guessPending=caught;
- const result={type:"result",caught,spy:spy?.name,spyId:spy?.id,secret,mostVoted:nameOf(winner),mostVotedId:winner,tally};
- if(caught){sendAll({type:"spyCaught",result});showSpyGuessForHost(result)}else{finishResult(result)}
- }}
-function showSpyGuessForHost(r){document.getElementById("voteCard").classList.add("hidden");if(r.spyId===roomCode){document.getElementById("spyGuessCard").classList.remove("hidden")}else document.getElementById("gameNotice").classList.remove("hidden"),document.getElementById("gameNotice").textContent=`${r.mostVoted}님이 Spy로 검거되었습니다. Spy의 마지막 추측을 기다리는 중…`}
-function finishGuess(guess,from){
- const spy=players.find(p=>assignments[p.id]==="spy");if(from!==spy?.id)return;
- const correct=String(guess).trim().toLowerCase()===String(secret).trim().toLowerCase();finishResult({type:"result",caught:true,spy:spy.name,secret,mostVoted:spy.name,guess,correct})
-}
-function submitSpyGuess(){const g=document.getElementById("spyGuessInput").value.trim();if(!g)return alert("제시어를 입력해주세요.");if(isHost)finishGuess(g,roomCode);else conn?.send({type:"guess",guess:g});document.getElementById("spyGuessCard").classList.add("hidden")}
-function finishResult(r){phase="result";guessPending=false;const data={...r,type:"result"};sendAll(data);showResult(data)}
-function showResult(d){
- document.getElementById("voteCard").classList.add("hidden");document.getElementById("spyGuessCard").classList.add("hidden");document.getElementById("resultCard").classList.remove("hidden");document.getElementById("questionCard").classList.add("hidden");
- let html="";
- if(d.caught){if(d.correct)html=`<div class="resultLose"><div style="font-size:38px">🕵️🎯</div><h2>Spy 역전승!</h2><p>Spy <b>${escapeHtml(d.spy||"")}</b>가 검거되었지만 제시어를 맞혔습니다.</p><p>Spy의 답: <b>${escapeHtml(d.guess||"")}</b></p>`;else html=`<div class="resultWin"><div style="font-size:38px">🎉</div><h2>시민팀 승리!</h2><p>Spy <b>${escapeHtml(d.spy||"")}</b>를 올바르게 검거했고, 마지막 추측도 틀렸습니다.</p><p>Spy의 답: <b>${escapeHtml(d.guess||"")}</b></p>`}
- else html=`<div class="resultLose"><div style="font-size:38px">🕵️</div><h2>Spy 승리!</h2><p>Spy <b>${escapeHtml(d.spy||"")}</b>를 잡지 못했습니다.</p>`;
- html+=`<p style="margin-top:14px">정답: <b>${escapeHtml(d.secret||"")}</b></p></div><div class="small" style="margin-top:12px">승리 조건: Spy 미검거 → Spy 승리 / Spy 검거 후 제시어 정답 → Spy 역전승 / Spy 검거 후 제시어 오답 → 시민팀 승리</div>`;
- document.getElementById("result").innerHTML=html;show("game")
-}
-function newRound(){if(!isHost)return alert("호스트가 다시 시작할 수 있어요.");startGame()}
-function leaveRoom(){clearInterval(timerHandle);try{conn?.close();peer?.destroy();connections.forEach(c=>c.close())}catch(e){}localStorage.removeItem(STORAGE_KEY);history.replaceState(null,"",location.pathname);location.reload()}
-function autoReconnect(){
- const code=roomFromUrl();const saved=loadSession();if(!code)return;
- document.getElementById("roomInput").value=code;
- if(saved?.roomCode===code&&saved.myName){myName=saved.myName;roomCode=code;isHost=false;rejoinRoom()}else{show("home");document.getElementById("joinName").value=saved?.myName||"";alert("이 게임 주소로 다시 들어왔어요. 닉네임을 입력한 뒤 참가해주세요.")}
-}
-async function rejoinRoom(){
- try{peer=new Peer();peer.on("open",()=>{conn=peer.connect(roomCode,{reliable:true});conn.on("open",()=>{conn.send({type:"join",name:myName});conn.send({type:"requestState"});setStatus("게임에 다시 연결했어요.")});conn.on("data",handleGuestData)});peer.on("error",()=>alert("호스트와 다시 연결하지 못했어요. 호스트가 게임을 종료했을 수 있습니다."));document.getElementById("roomCode").textContent=roomCode;show("lobby")}catch(e){alert("재입장에 실패했어요.")}
+ myName=document.getElementById("hostName").value.trim();if(!myName)return alert("닉네임을 입력해주세요.");
+ roomCode=randCode();myId=getId();isHost=true;
+ const difficulty=document.getElementById("difficulty").value,category=document.getElementById("category").value;
+ const obj={hostId:myId,phase:"lobby",round:0,difficulty,category,players:{},createdAt:firebase.database.ServerValue.TIMESTAMP};
+ obj.players[myId]={id:myId,name:myName,joinedAt:firebase.database.ServerValue.TIMESTAMP};
+ await db.ref("spyRooms/"+roomCode).set(obj);history.replaceState({}, "", "?="+roomCode);attachRoom();document.getElementById("roomCode").textContent=roomCode;document.getElementById("hostControls").classList.remove("hidden");document.getElementById("guestWait").classList.add("hidden");show("lobby");
 }
 async function joinRoom(){
- myName=document.getElementById("joinName").value.trim();roomCode=document.getElementById("roomInput").value.trim().toUpperCase();if(!myName||roomCode.length!==6)return alert("닉네임과 6자리 방 코드를 입력해주세요.");
- isHost=false;saveSession();setRoomUrl(roomCode);
- try{peer=new Peer();peer.on("open",()=>{conn=peer.connect(roomCode,{reliable:true});conn.on("open",()=>{conn.send({type:"join",name:myName});conn.send({type:"requestState"});setStatus("호스트에 연결됨!")});conn.on("data",handleGuestData);conn.on("close",()=>setStatus("연결이 잠시 끊겼어요. 재연결을 시도할 수 있습니다."))});peer.on("error",()=>alert("방을 찾지 못했어요. 코드를 확인해주세요."));document.getElementById("roomCode").textContent=roomCode;document.getElementById("hostControls").classList.add("hidden");document.getElementById("guestWait").classList.remove("hidden");show("lobby")}catch(e){alert("참가에 실패했어요.")}
+ myName=document.getElementById("joinName").value.trim();roomCode=document.getElementById("roomInput").value.trim().toUpperCase();
+ if(!myName||roomCode.length!==6)return alert("닉네임과 6자리 방 코드를 입력해주세요.");
+ myId=getId();isHost=false;roomRef=db.ref("spyRooms/"+roomCode);const snap=await roomRef.once("value");if(!snap.exists())return alert("방을 찾을 수 없어요.");
+ roomData=snap.val();await roomRef.child("players/"+myId).set({id:myId,name:myName,joinedAt:firebase.database.ServerValue.TIMESTAMP});history.replaceState({}, "", "?="+roomCode);attachRoom();document.getElementById("roomCode").textContent=roomCode;show("lobby");
 }
-window.addEventListener("load",()=>{document.getElementById("hostName").value=loadSession()?.isHost?loadSession().myName:"";autoReconnect()});
-window.addEventListener("beforeunload",()=>{try{peer?.disconnect()}catch(e){}});
-
+async function startGame(){
+ if(!isHost||Object.keys(roomData.players||{}).length<3)return alert("최소 3명이 필요해요.");
+ const ids=Object.keys(roomData.players),spy=ids[Math.floor(Math.random()*ids.length)],secret=pickSecret(roomData.category),c=CONFIG[roomData.difficulty]||CONFIG.normal;
+ const roles={};ids.forEach(id=>roles[id]=id===spy?"spy":"citizen");
+ const updates={phase:"question",round:(roomData.round||0)+1,secret,spyId:spy,roles,questions:{},votes:{},caught:false,spyGuess:"",result:null,startedAt:firebase.database.ServerValue.TIMESTAMP,endsAt:Date.now()+c.time*1000};
+ await roomRef.update(updates);
+}
+function applyRoomState(){
+ if(!roomData)return;document.getElementById("roomCode").textContent=roomCode;
+ if(roomData.hostId===myId){isHost=true;document.getElementById("hostControls").classList.toggle("hidden",roomData.phase!=="lobby");}else{isHost=false;document.getElementById("hostControls").classList.add("hidden")}
+ if(roomData.phase==="lobby"){document.getElementById("guestWait").classList.toggle("hidden",isHost);show("lobby");return}
+ if(roomData.phase==="question"||roomData.phase==="voting"||roomData.phase==="guess"||roomData.phase==="result"){show("game");renderGame()}
+}
+function renderGame(){
+ localRole=roomData.roles?.[myId]||"";localSecret=localRole==="citizen"?roomData.secret||"":"";const box=document.getElementById("roleBox");
+ if(localRole==="spy"){box.className="role spy";box.innerHTML='<div class="big">🕵️ SPY</div><div>당신은 Spy입니다.</div><div style="margin-top:14px">제시어를 모르므로 질문과 답변을 보고 추리하세요.</div>'}
+ else{box.className="role citizen";box.innerHTML='<div class="big">👤 시민</div><div>당신은 시민입니다.</div><div style="margin-top:14px">제시어는</div><div class="secret">'+esc(localSecret)+'</div>'}
+ document.getElementById("roundLabel").textContent=`ROUND ${roomData.round||1}`;renderQuestionLog();renderTargets();renderTimer();
+ document.getElementById("questionCard").classList.toggle("hidden",roomData.phase!=="question");
+ document.getElementById("voteCard").classList.toggle("hidden",roomData.phase!=="voting");
+ document.getElementById("hostGameControls").classList.toggle("hidden",!(isHost&&roomData.phase==="question"));
+ document.getElementById("spyGuessCard").classList.toggle("hidden",!(roomData.phase==="guess"&&localRole==="spy"&&!roomData.spyGuess));
+ document.getElementById("resultCard").classList.toggle("hidden",roomData.phase!=="result");
+ if(roomData.phase==="voting")buildVotes();if(roomData.phase==="guess"&&roomData.caught)document.getElementById("gameNotice").textContent="Spy가 제시어를 맞힐 마지막 기회입니다.";if(roomData.phase==="result")showResult();
+}
+function renderTimer(){clearInterval(timerHandle);if(!roomData?.endsAt||roomData.phase!=="question"){document.getElementById("timer").textContent=roomData?.phase==="voting"?"투표 중":"--:--";return}const tick=()=>{let n=Math.max(0,Math.ceil((roomData.endsAt-Date.now())/1000));document.getElementById("timer").textContent=Math.floor(n/60)+":"+String(n%60).padStart(2,"0");document.getElementById("timer").classList.toggle("warn",n<=15);if(n<=0){clearInterval(timerHandle);if(isHost&&roomData.phase==="question")showVoting()}};tick();timerHandle=setInterval(tick,500)}
+function renderTargets(){let ps=Object.values(roomData.players||{}).filter(p=>p.id!==myId);document.getElementById("questionTarget").innerHTML=ps.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}
+function renderQuestionLog(){let qs=Object.values(roomData.questions||{});document.getElementById("questionLog").innerHTML=qs.length?qs.map(q=>`<div class="logitem"><b>${esc(q.askerName)}</b> → <b>${esc(q.targetName)}</b><br>${esc(q.text)}${q.answer?`<br>↳ ${esc(q.answer)}`:"<br><span class='small'>답변 대기 중</span>"}</div>`).join(""):"<div class='small'>아직 질문이 없어요.</div>";let limit=CONFIG[roomData.difficulty]?.questions||3;let used=qs.filter(q=>q.askerId===myId).length;document.getElementById("questionLeft").textContent=Math.max(0,limit-used)}
+async function submitQuestion(){
+ if(roomData.phase!=="question")return;let text=document.getElementById("questionText").value.trim(),target=document.getElementById("questionTarget").value;if(!text||!target)return alert("질문할 사람과 질문 내용을 입력해주세요.");
+ let limit=CONFIG[roomData.difficulty]?.questions||3,used=Object.values(roomData.questions||{}).filter(q=>q.askerId===myId).length;if(used>=limit)return alert("질문 횟수를 모두 사용했어요.");
+ const qid=roomRef.child("questions").push().key,tn=roomData.players[target]?.name||"";
+ await roomRef.child("questions/"+qid).set({askerId:myId,askerName:myName,targetId:target,targetName:tn,text,createdAt:firebase.database.ServerValue.TIMESTAMP});
+ document.getElementById("questionText").value="";
+}
+async function submitAnswer(){let qs=Object.entries(roomData.questions||{}).filter(([id,q])=>q.targetId===myId&&!q.answer);if(!qs.length)return alert("답변할 질문이 없어요.");let [id]=qs[qs.length-1],a=document.getElementById("answerText").value.trim();if(!a)return alert("답변을 입력해주세요.");await roomRef.child("questions/"+id+"/answer").set(a);document.getElementById("answerText").value=""}
+function showVoting(){if(!isHost)return;roomRef.update({phase:"voting",votes:{},voteStartedAt:firebase.database.ServerValue.TIMESTAMP})}
+function buildVotes(){let ps=Object.values(roomData.players||{}).filter(p=>p.id!==myId);document.getElementById("voteGrid").innerHTML=ps.map(p=>`<button class="vote ${selectedVote===p.id?"selected":""}" onclick="selectVote('${p.id}')">${esc(p.name)}</button>`).join("");document.getElementById("voteBtn").disabled=!selectedVote}
+function selectVote(id){selectedVote=id;buildVotes()}
+async function submitVote(){if(!selectedVote)return;await roomRef.child("votes/"+myId).set(selectedVote);selectedVote="";document.getElementById("voteBtn").disabled=true;document.getElementById("voteStatus").classList.remove("hidden");document.getElementById("voteStatus").textContent="투표가 제출되었습니다. 다른 사람을 기다리는 중...";if(isHost)checkVotes()}
+async function checkVotes(){let snap=await roomRef.child("votes").once("value"),v=snap.val()||{},count=Object.keys(roomData.players||{}).length;if(Object.keys(v).length<count)return;let tally={};Object.values(v).forEach(x=>tally[x]=(tally[x]||0)+1);let max=Math.max(...Object.values(tally));let winners=Object.keys(tally).filter(x=>tally[x]===max);if(winners.length!==1)return roomRef.update({phase:"result",result:{type:"tie",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||""}});let winner=winners[0],caught=winner===roomData.spyId;if(caught)await roomRef.update({phase:"guess",caught:true,caughtPlayer:winner});else await roomRef.update({phase:"result",result:{type:"spy",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||""}})}
+function submitSpyGuess(){let g=document.getElementById("spyGuess").value.trim();if(!g)return alert("제시어를 입력해주세요.");let correct=g===roomData.secret;roomRef.update({spyGuess:g,phase:"result",result:{type:correct?"spyGuess":"citizen",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||"",guess:g}})}
+function endAsSpyWin(){if(isHost)roomRef.update({phase:"result",result:{type:"spy",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||""}})}
+function showResult(){let d=roomData.result||{},html="";if(d.type==="citizen")html=`<div class="winner">🎉<h2>시민팀 승리!</h2><p>Spy가 제시어를 맞히지 못했습니다.</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else if(d.type==="spyGuess")html=`<div class="winner">🕵️<h2>Spy 역전승!</h2><p>검거된 Spy가 제시어를 정확히 맞혔습니다.</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else if(d.type==="tie")html=`<div class="winner">⚖️<h2>투표 동률!</h2><p>누구도 검거되지 않았습니다. Spy 승리!</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else html=`<div class="winner">🕵️<h2>Spy 승리!</h2><p>Spy <b>${esc(d.spyName)}</b>가 검거되지 않았습니다.</p><p>제시어: <b>${esc(d.secret)}</b></p></div>`;document.getElementById("result").innerHTML=html}
+function newRound(){if(!isHost)return alert("호스트만 다음 라운드를 시작할 수 있어요.");startGame()}
+async function leaveRoom(){if(roomRef){await roomRef.child("players/"+myId).remove();}roomRef=null;roomData=null;joined=false;clearInterval(timerHandle);show("home");history.replaceState({}, "", location.pathname)}
+window.addEventListener("beforeunload",()=>{});
+async function boot(){myId=getId();let code=getParam();if(!code)return;roomCode=code;roomRef=db.ref("spyRooms/"+roomCode);let snap=await roomRef.once("value");if(!snap.exists()){history.replaceState({}, "", location.pathname);return}roomData=snap.val();let saved=roomData.players?.[myId];if(saved){myName=saved.name;isHost=roomData.hostId===myId;attachRoom();show(roomData.phase==="lobby"?"lobby":"game");}else{document.getElementById("roomInput").value=code}}
+boot();
 </script>
 </body>
 </html>
