@@ -93,7 +93,10 @@ function roomLink(){return location.origin+location.pathname+"?="+roomCode}
 function copyRoomLink(){navigator.clipboard?.writeText(roomLink()).then(()=>alert("게임 링크를 복사했어요!")).catch(()=>prompt("이 링크를 복사하세요.",roomLink()))}
 function attachRoom(){
  if(roomRef)roomRef.off();roomRef=db.ref("spyRooms/"+roomCode);
- roomRef.on("value",snap=>{roomData=snap.val();if(!roomData){setStatus("방이 존재하지 않아요.");return}joined=true;renderPlayers();updateSettings();applyRoomState()});
+ roomRef.child("players/"+myId).onDisconnect().remove();
+ roomRef.on("value",snap=>{roomData=snap.val();if(!roomData){setStatus("방이 존재하지 않아요.");return}if(!roomData.players?.[roomData.hostId]||(roomData.phase!=="lobby"&&roomData.phase!=="result"&&(Object.keys(roomData.players||{}).length<3||!roomData.players?.[roomData.spyId]))){
+  roomRef.transaction(cur=>{if(!cur)return null;const ids=Object.keys(cur.players||{});if(!ids.length)return null;if(cur.players?.[cur.hostId]&&(cur.phase==="lobby"||cur.phase==="result"||ids.length>=3&&cur.players?.[cur.spyId]))return;cur.hostId=cur.players?.[cur.hostId]?cur.hostId:ids[0];if(cur.phase!=="lobby"&&(ids.length<3||!cur.players?.[cur.spyId])){cur.phase="result";cur.result={type:"disconnect"};}return cur},undefined,false);}
+ joined=true;renderPlayers();updateSettings();applyRoomState()});
  db.ref(".info/connected").on("value",s=>setStatus(s.val()?"Firebase 연결됨":"Firebase 연결 끊김"));
 }
 async function createRoom(){
@@ -108,7 +111,10 @@ async function joinRoom(){
  myName=document.getElementById("joinName").value.trim();roomCode=document.getElementById("roomInput").value.trim().toUpperCase();
  if(!myName||roomCode.length!==6)return alert("닉네임과 6자리 방 코드를 입력해주세요.");
  myId=getId();isHost=false;roomRef=db.ref("spyRooms/"+roomCode);const snap=await roomRef.once("value");if(!snap.exists())return alert("방을 찾을 수 없어요.");
- roomData=snap.val();await roomRef.child("players/"+myId).set({id:myId,name:myName,joinedAt:firebase.database.ServerValue.TIMESTAMP});history.replaceState({}, "", "?="+roomCode);attachRoom();document.getElementById("roomCode").textContent=roomCode;show("lobby");
+ const result=await roomRef.transaction(cur=>{
+  if(!cur||cur.phase!=="lobby"||Object.keys(cur.players||{}).length>=20)return;
+  cur.players=cur.players||{};cur.players[myId]={id:myId,name:myName.slice(0,12),joinedAt:firebase.database.ServerValue.TIMESTAMP};return cur;
+ },undefined,false);if(!result.committed)return alert("이미 시작했거나 참가할 수 없는 방입니다.");roomData=result.snapshot.val();history.replaceState({}, "", "?="+roomCode);attachRoom();document.getElementById("roomCode").textContent=roomCode;show("lobby");
 }
 async function startGame(){
  if(!isHost||Object.keys(roomData.players||{}).length<3)return alert("최소 3명이 필요해요.");
@@ -121,7 +127,7 @@ function applyRoomState(){
  if(!roomData)return;document.getElementById("roomCode").textContent=roomCode;updateSettings();
  if(roomData.hostId===myId){isHost=true;document.getElementById("hostControls").classList.toggle("hidden",roomData.phase!=="lobby");}else{isHost=false;document.getElementById("hostControls").classList.add("hidden")}
  if(roomData.phase==="lobby"){document.getElementById("guestWait").classList.toggle("hidden",isHost);show("lobby");return}
- if(roomData.phase==="question"||roomData.phase==="voting"||roomData.phase==="guess"||roomData.phase==="result"){show("game");renderGame()}
+ if(roomData.phase==="question"||roomData.phase==="voting"||roomData.phase==="guess"||roomData.phase==="result"){show("game");renderGame();if(isHost&&roomData.phase==="voting")checkVotes().catch(console.error)}
 }
 function renderGame(){
  localRole=roomData.roles?.[myId]||"";localSecret=localRole==="citizen"?roomData.secret||"":"";const box=document.getElementById("roleBox");
@@ -159,12 +165,13 @@ async function submitVote(){if(!selectedVote)return;await roomRef.child("votes/"
 async function checkVotes(){let snap=await roomRef.child("votes").once("value"),v=snap.val()||{},count=Object.keys(roomData.players||{}).length;if(Object.keys(v).length<count)return;let tally={};Object.values(v).forEach(x=>tally[x]=(tally[x]||0)+1);let max=Math.max(...Object.values(tally));let winners=Object.keys(tally).filter(x=>tally[x]===max);if(winners.length!==1)return roomRef.update({phase:"result",result:{type:"tie",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||""}});let winner=winners[0],caught=winner===roomData.spyId;if(caught)await roomRef.update({phase:"guess",caught:true,caughtPlayer:winner});else await roomRef.update({phase:"result",result:{type:"spy",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||""}})}
 function submitSpyGuess(){let g=document.getElementById("spyGuess").value.trim();if(!g)return alert("제시어를 입력해주세요.");let correct=g===roomData.secret;roomRef.update({spyGuess:g,phase:"result",result:{type:correct?"spyGuess":"citizen",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||"",guess:g}})}
 function endAsSpyWin(){if(isHost)roomRef.update({phase:"result",result:{type:"spy",secret:roomData.secret,spyName:roomData.players[roomData.spyId]?.name||""}})}
-function showResult(){let d=roomData.result||{},html="";if(d.type==="citizen")html=`<div class="winner">🎉<h2>시민팀 승리!</h2><p>Spy가 제시어를 맞히지 못했습니다.</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else if(d.type==="spyGuess")html=`<div class="winner">🕵️<h2>Spy 역전승!</h2><p>검거된 Spy가 제시어를 정확히 맞혔습니다.</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else if(d.type==="tie")html=`<div class="winner">⚖️<h2>투표 동률!</h2><p>누구도 검거되지 않았습니다. Spy 승리!</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else html=`<div class="winner">🕵️<h2>Spy 승리!</h2><p>Spy <b>${esc(d.spyName)}</b>가 검거되지 않았습니다.</p><p>제시어: <b>${esc(d.secret)}</b></p></div>`;document.getElementById("result").innerHTML=html}
+function showResult(){let d=roomData.result||{},html="";if(d.type==="disconnect")html=`<div class="winner"><h2>연결 종료로 게임 종료</h2><p>참가자가 3명 미만이 되어 게임을 마쳤습니다.</p></div>`;else if(d.type==="citizen")html=`<div class="winner">🎉<h2>시민팀 승리!</h2><p>Spy가 제시어를 맞히지 못했습니다.</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else if(d.type==="spyGuess")html=`<div class="winner">🕵️<h2>Spy 역전승!</h2><p>검거된 Spy가 제시어를 정확히 맞혔습니다.</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else if(d.type==="tie")html=`<div class="winner">⚖️<h2>투표 동률!</h2><p>누구도 검거되지 않았습니다. Spy 승리!</p><p>Spy: <b>${esc(d.spyName)}</b><br>제시어: <b>${esc(d.secret)}</b></p></div>`;else html=`<div class="winner">🕵️<h2>Spy 승리!</h2><p>Spy <b>${esc(d.spyName)}</b>가 검거되지 않았습니다.</p><p>제시어: <b>${esc(d.secret)}</b></p></div>`;document.getElementById("result").innerHTML=html}
 function newRound(){if(!isHost)return alert("호스트만 다음 라운드를 시작할 수 있어요.");startGame()}
-async function leaveRoom(){if(roomRef){await roomRef.child("players/"+myId).remove();}roomRef=null;roomData=null;joined=false;clearInterval(timerHandle);show("home");history.replaceState({}, "", location.pathname)}
+async function leaveRoom(){if(roomRef){await roomRef.child("players/"+myId).remove();roomRef.off();}roomRef=null;roomData=null;joined=false;clearInterval(timerHandle);show("home");history.replaceState({}, "", location.pathname)}
 window.addEventListener("beforeunload",()=>{});
 async function boot(){myId=getId();let code=getParam();if(!code)return;roomCode=code;roomRef=db.ref("spyRooms/"+roomCode);let snap=await roomRef.once("value");if(!snap.exists()){history.replaceState({}, "", location.pathname);return}roomData=snap.val();let saved=roomData.players?.[myId];if(saved){myName=saved.name;isHost=roomData.hostId===myId;attachRoom();show(roomData.phase==="lobby"?"lobby":"game");}else{document.getElementById("roomInput").value=code}}
 boot();
 </script>
 </body>
 </html>
+
