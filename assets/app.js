@@ -41,14 +41,37 @@ async function createRoom(){
  obj.players[myId]={id:myId,name:myName,joinedAt:firebase.database.ServerValue.TIMESTAMP};
  await db.ref("spyRooms/"+roomCode).set(obj);history.replaceState({}, "", "?="+roomCode);attachRoom();document.getElementById("roomCode").textContent=roomCode;document.getElementById("hostControls").classList.remove("hidden");document.getElementById("guestWait").classList.add("hidden");show("lobby");
 }
+let joiningRoom=false;
 async function joinRoom(){
- myName=document.getElementById("joinName").value.trim();roomCode=document.getElementById("roomInput").value.trim().toUpperCase();
- if(!myName||roomCode.length!==6)return alert("닉네임과 6자리 방 코드를 입력해주세요.");
- myId=getId();isHost=false;roomRef=db.ref("spyRooms/"+roomCode);const snap=await roomRef.once("value");if(!snap.exists())return alert("방을 찾을 수 없어요.");
- const result=await roomRef.transaction(cur=>{
-  if(!cur||cur.phase!=="lobby"||Object.keys(cur.players||{}).length>=20)return;
-  cur.players=cur.players||{};cur.players[myId]={id:myId,name:myName.slice(0,12),joinedAt:firebase.database.ServerValue.TIMESTAMP};return cur;
- },undefined,false);if(!result.committed)return alert("이미 시작했거나 참가할 수 없는 방입니다.");roomData=result.snapshot.val();history.replaceState({}, "", "?="+roomCode);attachRoom();document.getElementById("roomCode").textContent=roomCode;show("lobby");
+ if(joiningRoom)return;
+ const name=document.getElementById("joinName").value.trim().slice(0,12),code=document.getElementById("roomInput").value.trim().toUpperCase();
+ if(!name||!/^[A-Z0-9]{6}$/.test(code))return alert("닉네임과 6자리 방 코드를 입력해주세요.");
+ joiningRoom=true;
+ try{
+  const id=getId(),ref=db.ref("spyRooms/"+code);
+  const result=await ref.transaction(cur=>{
+   // An empty local cache is not proof that the server room is missing.
+   // Returning null lets Firebase compare with the server and retry.
+   if(cur===null)return null;
+   if(cur.players?.[id])return cur;
+   if(cur.phase!=="lobby"||Object.keys(cur.players||{}).length>=20)return;
+   cur.players=cur.players||{};
+   cur.players[id]={id,name,joinedAt:firebase.database.ServerValue.TIMESTAMP};return cur;
+  },undefined,false);
+  const data=result.snapshot.val();
+  if(!data)return alert("방을 찾을 수 없어요. 방 코드를 확인해주세요.");
+  if(!result.committed||!data.players?.[id]){
+   if(data.phase!=="lobby")return alert("이미 시작한 방이에요. 호스트가 새 방을 만든 뒤 참가해주세요.");
+   if(Object.keys(data.players||{}).length>=20)return alert("방이 가득 찼어요. 최대 20명까지 참가할 수 있어요.");
+   return alert("방 상태가 변경되어 참가하지 못했어요. 다시 시도해주세요.");
+  }
+  myId=id;myName=data.players[id].name;roomCode=code;roomData=data;isHost=data.hostId===id;
+  history.replaceState({}, "", "?="+roomCode);attachRoom();applyRoomState();
+ }catch(error){
+  console.error("Spy room join failed",error);
+  const denied=/permission/i.test(error.code||error.message||"");
+  alert(denied?"방 접근 권한 오류예요. Firebase Database Rules를 확인해주세요.":"방에 연결하지 못했어요. 연결 상태를 확인하고 다시 시도해주세요.");
+ }finally{joiningRoom=false}
 }
 async function startGame(){
  if(!isHost||Object.keys(roomData.players||{}).length<3)return alert("최소 3명이 필요해요.");
