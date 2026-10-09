@@ -18,7 +18,27 @@ function goHome(){location.href=MAIN_URL}
 function show(id){["home","lobby","game"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id))}
 function setStatus(t){document.getElementById("connStatus").textContent=t}
 function randCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
-function getId(){let x=localStorage.getItem("formwheel_spy_player_id");if(!x){x="p_"+Math.random().toString(36).slice(2,12);localStorage.setItem("formwheel_spy_player_id",x)}return x}
+let playerIdPromise;
+function getId(){
+ if(playerIdPromise)return playerIdPromise;
+ playerIdPromise=(async()=>{
+  const key="formwheel_spy_tab_player_id";
+  const fresh=()=>"p_"+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
+  let id=sessionStorage.getItem(key)||fresh();
+  // Duplicating a tab can copy sessionStorage. A tab holds its own ID lock.
+  if(navigator.locks){
+   const claim=id=>new Promise((resolve,reject)=>{
+    navigator.locks.request("formwheel-spy-player:"+id,{ifAvailable:true},lock=>{
+     resolve(!!lock);
+     if(lock)return new Promise(()=>{});
+    }).catch(reject);
+   });
+   while(!await claim(id))id=fresh();
+  }
+  sessionStorage.setItem(key,id);return id;
+ })();
+ return playerIdPromise;
+}
 function allWords(cat){return cat==="all"?Object.values(categories).flat():categories[cat]||categories.daily}
 function pickSecret(cat){let a=allWords(cat);return a[Math.floor(Math.random()*a.length)]}
 function renderPlayers(){let ps=roomData?.players||{};let arr=Object.values(ps);document.getElementById("count").textContent=arr.length;document.getElementById("players").innerHTML=arr.map(p=>`<div class="player">👤 ${esc(p.name)}${p.id===roomData.hostId?" · HOST":""}</div>`).join("")}
@@ -35,7 +55,7 @@ function attachRoom(){
 }
 async function createRoom(){
  myName=document.getElementById("hostName").value.trim();if(!myName)return alert("닉네임을 입력해주세요.");
- roomCode=randCode();myId=getId();isHost=true;
+ roomCode=randCode();myId=await getId();isHost=true;
  const difficulty=document.getElementById("difficulty").value,category=document.getElementById("category").value,mode=document.getElementById("gameMode").value;
  const obj={hostId:myId,phase:"lobby",round:0,difficulty,category,mode,players:{},createdAt:firebase.database.ServerValue.TIMESTAMP};
  obj.players[myId]={id:myId,name:myName,joinedAt:firebase.database.ServerValue.TIMESTAMP};
@@ -48,7 +68,7 @@ async function joinRoom(){
  if(!name||!/^[A-Z0-9]{6}$/.test(code))return alert("닉네임과 6자리 방 코드를 입력해주세요.");
  joiningRoom=true;
  try{
-  const id=getId(),ref=db.ref("spyRooms/"+code);
+  const id=await getId(),ref=db.ref("spyRooms/"+code);
   const result=await ref.transaction(cur=>{
    // An empty local cache is not proof that the server room is missing.
    // Returning null lets Firebase compare with the server and retry.
@@ -126,5 +146,5 @@ function showResult(){let d=roomData.result||{},html="";if(d.type==="disconnect"
 function newRound(){if(!isHost)return alert("호스트만 다음 라운드를 시작할 수 있어요.");startGame()}
 async function leaveRoom(){if(roomRef){await roomRef.child("players/"+myId).remove();roomRef.off();}roomRef=null;roomData=null;joined=false;clearInterval(timerHandle);show("home");history.replaceState({}, "", location.pathname)}
 window.addEventListener("beforeunload",()=>{});
-async function boot(){myId=getId();let code=getParam();if(!code)return;roomCode=code;roomRef=db.ref("spyRooms/"+roomCode);let snap=await roomRef.once("value");if(!snap.exists()){history.replaceState({}, "", location.pathname);return}roomData=snap.val();let saved=roomData.players?.[myId];if(saved){myName=saved.name;isHost=roomData.hostId===myId;attachRoom();show(roomData.phase==="lobby"?"lobby":"game");}else{document.getElementById("roomInput").value=code}}
+async function boot(){myId=await getId();let code=getParam();if(!code)return;roomCode=code;roomRef=db.ref("spyRooms/"+roomCode);let snap=await roomRef.once("value");if(!snap.exists()){history.replaceState({}, "", location.pathname);return}roomData=snap.val();let saved=roomData.players?.[myId];if(saved){myName=saved.name;isHost=roomData.hostId===myId;attachRoom();show(roomData.phase==="lobby"?"lobby":"game");}else{document.getElementById("roomInput").value=code}}
 boot();
