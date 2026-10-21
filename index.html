@@ -77,6 +77,10 @@ document.addEventListener("DOMContentLoaded",()=>{
  if($("questionText"))$("questionText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();const b=questionCard?.querySelector('button[onclick="submitQuestion()"]');if(b&&!b.disabled)b.click();}});
 });
 </script>
+<script>
+/* Secol Random 10 */
+document.addEventListener("DOMContentLoaded",()=>{const el=document.createElement("div");el.className="card";el.innerHTML='<h3>🎉 10탄 파티 도우미</h3><button id="sr10SpyRule">📖 3줄 규칙</button> <button id="sr10SpyQuestion">🎲 토론 질문</button> <button id="sr10SpyCountdown">⏳ 10초 준비</button><p id="sr10SpyStatus" role="status"></p>';document.getElementById("home")?.append(el);const out=document.getElementById("sr10SpyStatus"),pick=a=>a[Math.floor(Math.random()*a.length)];document.getElementById("sr10SpyRule").onclick=()=>out.textContent="① 시민은 같은 제시어를 알아요. ② Spy는 모르는 상태에서 대답해요. ③ 서로 대화하고 Spy를 투표로 찾아요.";document.getElementById("sr10SpyQuestion").onclick=()=>out.textContent=pick(["거기에서 가장 인기 있는 건?","혼자 가도 괜찮을까?","가장 기억에 남을 장면은?","언제 방문하면 좋을까?"]);let t;document.getElementById("sr10SpyCountdown").onclick=()=>{clearInterval(t);let n=10;out.textContent="준비 "+n; t=setInterval(()=>{n--;out.textContent=n?"준비 "+n:"시작!";if(!n)clearInterval(t)},1000)};});
+</script>
 </body>
 </html>
 
