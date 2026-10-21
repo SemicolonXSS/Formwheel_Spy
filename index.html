@@ -59,6 +59,24 @@
 
 <script src="./assets/app.js?v=20261021-random6"></script>
 <script type="module" src="https://semicolonxss.github.io/Formwheel/assets/live-presence.js?v=20261017-duration"></script>
+<script>
+/* Secol Random 8: optional quality-of-life tools */
+document.addEventListener("DOMContentLoaded",()=>{
+ const $=id=>document.getElementById(id);
+ const safeStore=(key,val)=>{try{localStorage.setItem(key,val)}catch{}};
+ const nameKey="fw_spy_recent_name_v1";
+ let saved="";try{saved=localStorage.getItem(nameKey)||""}catch{}
+ for(const id of ["hostName","joinName"]){const el=$(id);if(!el)continue;if(!el.value)el.value=saved;el.addEventListener("change",()=>{const v=el.value.trim().slice(0,12);safeStore(nameKey,v);const other=$(id==="hostName"?"joinName":"hostName");if(other&&!other.value)other.value=v;});}
+ const panel=document.createElement("div");panel.className="card";panel.style.marginTop="12px";
+ panel.innerHTML='<h3>🎲 질문 아이디어 뽑기</h3><p id="fwSpyPrompt" role="status">질문이 생각나지 않을 때 눌러보세요!</p><button type="button" class="btn secondary" id="fwSpyPromptBtn">🎯 랜덤 질문</button> <button type="button" class="btn secondary" id="fwSpyFillBtn">✍️ 질문창에 넣기</button>';
+ const questionCard=$("questionCard");if(questionCard)questionCard.appendChild(panel);
+ const prompts=["여기에 자주 오는 편이야?","이곳은 실내일까, 야외일까?","여기에 오면 가장 먼저 뭐 해?","밤에도 사람들이 많아?","친구와 함께 오기 좋아?","여기서 가장 필요한 물건은 뭐야?","이곳에서 가장 흔히 듣는 소리는?","여기는 계절에 따라 달라져?"];
+ let current=prompts[0],previous=-1;
+ $("fwSpyPromptBtn").onclick=()=>{let i=Math.floor(Math.random()*prompts.length);if(i===previous)i=(i+1)%prompts.length;previous=i;current=prompts[i];$("fwSpyPrompt").textContent=current;};
+ $("fwSpyFillBtn").onclick=()=>{if($("questionText")){$("questionText").value=current;$("questionText").focus();}};
+ if($("questionText"))$("questionText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();const b=questionCard?.querySelector('button[onclick="submitQuestion()"]');if(b&&!b.disabled)b.click();}});
+});
+</script>
 </body>
 </html>
 
