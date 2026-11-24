@@ -17,19 +17,19 @@
 <meta name="twitter:image" content="https://semicolonxss.github.io/Formwheel/og-image.png">
 <script type="module" src="https://semicolonxss.github.io/Formwheel/shared/direct-visitor.js?v=20261028"></script>
 </head>
-<body><div role="note" style="position:relative;z-index:1;box-sizing:border-box;max-width:58rem;margin:12px auto;padding:10px 13px;border:1px solid #e3bc72;border-radius:10px;background:#fff7e9;color:#624414;font:14px/1.55 system-ui"><strong>🚧 온라인 스파이 게임 공사 중</strong><div>방을 만들거나 참가할 수 없어요.</div></div>
+<body><aside aria-label="온라인 서비스 안내" style="position:relative;z-index:1;box-sizing:border-box;max-width:58rem;margin:12px auto;padding:10px 13px;border:1px solid #e3bc72;border-radius:10px;background:#fff7e9;color:#624414;font:14px/1.55 system-ui"><strong>🚧 온라인 스파이 게임 공사 중</strong><div>방을 만들거나 참가할 수 없어요.</div></aside>
 <header class="top"><a class="logo fw-hub-logo" aria-label="FormWheel 메인으로 이동" href="https://semicolonxss.github.io/Formwheel/"><span class="fw-hub-form">Form</span><span class="fw-hub-icon" aria-hidden="true"></span><span class="fw-hub-wheel">Wheel</span></a></header>
 <main class="wrap">
 <section id="home">
  <div class="card hero"><div class="spyicon">🕵️</div><h1>FormWheel Spy</h1><div class="sub">한 명의 Spy를 찾아내는 질문 추리 게임</div></div>
  <div class="card">
   <h2>게임 만들기</h2><p>방을 만들고 친구들에게 링크 또는 코드를 공유하세요.</p>
-  <label>내 닉네임</label><input id="hostName" maxlength="12" placeholder="예: 민수">
-  <div class="grid" style="margin-top:12px"><div><label>난이도</label><select id="difficulty"><option value="easy">쉬움 · 4질문 · 3분</option><option value="normal" selected>보통 · 3질문 · 2분</option><option value="hard">어려움 · 2질문 · 90초</option></select></div><div><label>장소 범위</label><select id="category"><option value="all">전체</option><option value="daily">일상</option><option value="food">음식·쇼핑</option><option value="transport">교통</option><option value="culture">문화·스포츠</option><option value="nature">자연</option><option value="special">공공·특수</option><option value="chaos">혼돈</option></select></div></div>
-  <div style="margin-top:12px"><label>게임 모드</label><select id="gameMode"><option value="remote" selected>🌐 원격 모드 · 질문 기능 사용</option><option value="offline">👥 오프라인 모드 · 질문 기능 없음</option></select></div>
+  <label for="hostName">내 닉네임</label><input id="hostName" maxlength="12" placeholder="예: 민수">
+  <div class="grid" style="margin-top:12px"><div><label for="difficulty">난이도</label><select id="difficulty"><option value="easy">쉬움 · 4질문 · 3분</option><option value="normal" selected>보통 · 3질문 · 2분</option><option value="hard">어려움 · 2질문 · 90초</option></select></div><div><label for="category">장소 범위</label><select id="category"><option value="all">전체</option><option value="daily">일상</option><option value="food">음식·쇼핑</option><option value="transport">교통</option><option value="culture">문화·스포츠</option><option value="nature">자연</option><option value="special">공공·특수</option><option value="chaos">혼돈</option></select></div></div>
+  <div style="margin-top:12px"><label for="gameMode">게임 모드</label><select id="gameMode"><option value="remote" selected>🌐 원격 모드 · 질문 기능 사용</option><option value="offline">👥 오프라인 모드 · 질문 기능 없음</option></select></div>
   <button class="btn" onclick="createRoom()">방 만들기</button>
  </div>
- <div class="card"><h2>게임 참가</h2><label>닉네임</label><input id="joinName" maxlength="12" placeholder="예: 지수"><label style="margin-top:12px">방 코드</label><input id="roomInput" maxlength="6" placeholder="6자리 코드"><button class="btn secondary" onclick="joinRoom()">참가하기</button></div>
+ <div class="card"><h2>게임 참가</h2><label for="joinName">닉네임</label><input id="joinName" maxlength="12" placeholder="예: 지수"><label style="margin-top:12px" for="roomInput">방 코드</label><input id="roomInput" maxlength="6" placeholder="6자리 코드"><button class="btn secondary" onclick="joinRoom()">참가하기</button></div>
  <div class="card"><div class="small">※ Firebase Realtime Database에 방 상태를 저장합니다. 새로고침하거나 게임 주소로 다시 들어와도 진행 상태를 복구할 수 있습니다.</div></div>
 </section>
 
@@ -46,14 +46,14 @@
  <div class="card"><div class="small" id="roundLabel">ROUND 1</div><h2 id="gameTitle">당신의 역할</h2><div id="roleBox" class="role"></div><div id="gameNotice" class="notice hidden"></div></div>
  <div id="questionCard" class="card">
   <h2>질문 시간</h2><div class="timer" id="timer">--:--</div><div class="roundbox" id="questionModeBox">남은 질문: <b id="questionLeft">-</b>회 · 원격 모드에서는 질문하고 답변을 기록하세요.</div>
-  <div class="two" style="margin-top:12px"><div><label>질문할 사람</label><select id="questionTarget"></select></div><div><label>질문 내용</label><input id="questionText" maxlength="100" placeholder="예: 여기에 밤에도 와?"></div></div>
+  <div class="two" style="margin-top:12px"><div><label for="questionTarget">질문할 사람</label><select id="questionTarget"></select></div><div><label for="questionText">질문 내용</label><input id="questionText" maxlength="100" placeholder="예: 여기에 밤에도 와?"></div></div>
   <button class="btn" onclick="submitQuestion()">질문 기록</button>
   <div style="margin-top:15px"><label>질문 기록</label><div id="questionLog" class="log"></div></div>
  </div>
  <div id="offlineCard" class="card hidden"><h2>👥 오프라인 질문 시간</h2><div class="timer" id="offlineTimer">--:--</div><div class="roundbox">질문 기능은 꺼져 있습니다. 같은 장소에서 직접 질문하고 대화하세요.<br><b>시간이 끝나면 자동으로 투표 단계로 넘어갑니다.</b></div></div>
- <div id="answerCard" class="card hidden"><h2>답변하기</h2><div id="answerPrompt"></div><textarea id="answerText" maxlength="150" placeholder="질문에 답하세요"></textarea><button class="btn" onclick="submitAnswer()">답변 제출</button></div>
+ <div id="answerCard" class="card hidden"><h2>답변하기</h2><div id="answerPrompt"></div><textarea id="answerText" maxlength="150" placeholder="질문에 답하세요" aria-label="답변 내용"></textarea><button class="btn" onclick="submitAnswer()">답변 제출</button></div>
  <div id="voteCard" class="card hidden"><h2>Spy 의심 투표</h2><p>가장 의심스러운 사람 한 명을 선택하세요. 모든 참가자가 투표하면 판정합니다.</p><div id="voteGrid" class="votegrid"></div><button id="voteBtn" class="btn" onclick="submitVote()" disabled>투표하기</button><div id="voteStatus" class="notice hidden"></div></div>
- <div id="spyGuessCard" class="card hidden"><h2>🎯 Spy 마지막 기회</h2><p>당신이 Spy라면, 검거되었어도 제시어를 맞히면 역전승할 수 있습니다.</p><input id="spyGuess" placeholder="제시어를 입력하세요"><button class="btn" onclick="submitSpyGuess()">제시어 추측</button></div>
+ <div id="spyGuessCard" class="card hidden"><h2>🎯 Spy 마지막 기회</h2><p>당신이 Spy라면, 검거되었어도 제시어를 맞히면 역전승할 수 있습니다.</p><input id="spyGuess" placeholder="제시어를 입력하세요" aria-label="스파이의 정답 추측"><button class="btn" onclick="submitSpyGuess()">제시어 추측</button></div>
  <div id="hostGameControls" class="card hidden"><h2>호스트 진행</h2><button class="btn" onclick="showVoting()">투표 시작</button><button class="btn secondary" onclick="endAsSpyWin()">즉시 Spy 승리 처리</button></div>
  <div id="resultCard" class="card hidden"><h2>결과</h2><div id="result"></div><button class="btn" onclick="newRound()">다시 하기</button></div>
 </section>
